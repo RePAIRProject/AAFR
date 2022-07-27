@@ -36,24 +36,24 @@ w_co : The corner penalty function ( one value per node )
 data = Obj1.w_k
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_k.JPG)
 ```python
 data = Obj1.w_cr_v 
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_cr.JPG)
 ```python
 data = Obj1.w_b1
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1.JPG)
 ```python
 data = Obj1.w_b2
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b2.JPG)
 ```python
 data = Obj1.w_co
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_co.JPG)

@@ -235,6 +235,8 @@ class FeatureLines(object):
         return F_lines
 
     def show_heat(self,weights):
+        if weights.shape[-1] == 3:
+            weights = self.NormalizeData(np.sqrt(np.sum(weights * weights,axis=1)))
         cmap = matplotlib.cm.get_cmap('viridis')
         rgba = cmap(weights)
         rgb = rgba[:,:3]

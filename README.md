@@ -1,7 +1,18 @@
-# Foobar
+# Feature Lines Extraction
 
-Foobar is a Python library for dealing with word pluralization.
+FeatureLine is used to extract feature lines as per the paper (Gumhold, Stefan & Wang, Xinlong & MacLeod, Rob. (2001). Feature Extraction from Point Clouds. Proceedings of 10th international meshing roundtable. 2001. )
 
+##install requirements
+after creating the environment 
+
+```console
+foo@bar:~$ conda install --file requirements.txt
+```
+or 
+
+```console
+foo@bar:~$ pip3 install requirements.txt
+```
 
 ## Usage
 

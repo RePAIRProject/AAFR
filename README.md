@@ -2,7 +2,7 @@
 
 FeatureLine is used to extract feature lines as per the paper (Gumhold, Stefan & Wang, Xinlong & MacLeod, Rob. (2001). Feature Extraction from Point Clouds. Proceedings of 10th international meshing roundtable. 2001. )
 
-##install requirements
+## install requirements
 after creating the environment 
 
 ```console

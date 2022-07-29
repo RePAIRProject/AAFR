@@ -19,7 +19,7 @@ class FeatureLines(object):
     def set_params(self,alpha=0.2,gamma=0.5,crease_threshold=0.9,border_threshold=0.9,pattern_length_T=-1):
 
             if pattern_length_T == -1:
-                pattern_length_T = np.sqrt(len(self.pcd.points))//8
+                pattern_length_T = np.sqrt(len(self.pcd.points))//2
             self.w_c = self.weight_crease_penalty(alpha=alpha)
 
             self.w_b = self.weight_border_penalty(gamma=gamma)
@@ -97,8 +97,9 @@ class FeatureLines(object):
         max_angle = []
         for i in tqdm(range(len(points_q_points))):
             p,q_points = points_p[i],points_q_points[i]
-            vec = np.repeat(np.asarray([(np.dot(q_points,p))/(np.sqrt(p.dot(p)))**2]),3,axis=0)
-            projection = np.multiply(vec.T, p)
+            n = self.points_eig_vecs[i][0]
+            vec = np.repeat(np.asarray([(np.dot(q_points,n))/(np.sqrt(n.dot(n)))**2]),3,axis=0)
+            projection = np.multiply(vec.T, n)
             q_points_projected = np.asarray(q_points)-np.asarray(projection)
             q_points_projected_vectors = list(p-q_points_projected)
             angle = float("-inf")
@@ -220,8 +221,8 @@ class FeatureLines(object):
             w,edge = heapq.heappop(edges)
             if ds.exists(edge[0]) and ds.exists(edge[1]):
                 if not ds.connected(edge[0],edge[1]):
-                    # if ds_queue.count(edge[0]) + ds_queue.count(edge[1]) >= pattern_length_T:
-                    ds.connect(edge[0],edge[1])
+                    if ds.count(edge[0]) + ds.count(edge[1]) >= pattern_length_T//2:
+                        ds.connect(edge[0],edge[1])
                     # ds_queue.connect(edge[0],edge[1])
             else:
                 ds.add(edge[0],edge[1])
@@ -229,7 +230,7 @@ class FeatureLines(object):
 
         F_lines = []
         for group in list(ds.ds.itersets()):
-            if len(group) < pattern_length_T//6:
+            if len(group) < pattern_length_T//4:
                 continue
             F_lines.append(group)
         return F_lines

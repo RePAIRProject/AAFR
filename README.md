@@ -1,7 +1,18 @@
-# Foobar
+# Feature Lines Extraction
 
-Foobar is a Python library for dealing with word pluralization.
+FeatureLine is used to extract feature lines as per the paper (Gumhold, Stefan & Wang, Xinlong & MacLeod, Rob. (2001). Feature Extraction from Point Clouds. Proceedings of 10th international meshing roundtable. 2001. )
 
+##install requirements
+after creating the environment 
+
+```console
+foo@bar:~$ conda install --file requirements.txt
+```
+or 
+
+```console
+foo@bar:~$ pip3 install requirements.txt
+```
 
 ## Usage
 
@@ -36,24 +47,24 @@ w_co : The corner penalty function ( one value per node )
 data = Obj1.w_k
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_k.JPG)
 ```python
 data = Obj1.w_cr_v 
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_cr.JPG)
 ```python
 data = Obj1.w_b1
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1.JPG)
 ```python
 data = Obj1.w_b2
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b2.JPG)
 ```python
 data = Obj1.w_co
 Obj1.show_heat(data)
 ```
-![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_b1_mag.JP)
+![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_co.JPG)

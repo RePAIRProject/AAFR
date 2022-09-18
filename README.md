@@ -25,10 +25,6 @@ Obj1 = FeatureLines("data/group19/fragment.ply",voxel_size=0.1)
 # calculates all penalty functions after creating the graph where N = 16 (nearest neighbor)
 Obj1.init(16)
 
-# set the parameters as specified in the paper 
-# alpha, gamma,crease_threshold, and border_threshold and pattern_length_threshold 
-# pattern_length_T is set by default to half sqrt of the number of nodes
-Obj1.set_params(alpha=0.2,gamma=0.5,crease_threshold=1.7,border_threshold=2)
 ```
 ## Penalties calculated
 w_k : curvature estimate for each node (one value per node)
@@ -68,3 +64,21 @@ data = Obj1.w_co
 Obj1.show_heat(data)
 ```
 ![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_co.JPG)
+
+## Default Defined patterns Creation
+
+```python
+from helper import FeatureLines
+
+# returns 'Object after the downsampling specified'
+Obj1 = FeatureLines("data/group19/fragment.ply",voxel_size=0.1)
+
+# calculates all penalty functions after creating the graph where N = 16 (nearest neighbor)
+Obj1.init(16)
+# set the parameters as specified in the paper 
+# alpha, gamma,crease_threshold, and border_threshold and pattern_length_threshold 
+# pattern_length_T is set by default to half sqrt of the number of nodes
+Obj1.init_graph(alpha=0.9,gamma=0.5)
+Obj1.create_crease(T=1.4,pattern_length_T=2)
+Obj1.show_pattern(Obj1.crease_pattern_pruned)
+```

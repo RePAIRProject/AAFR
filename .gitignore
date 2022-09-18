@@ -10,6 +10,9 @@
 *.ply
 *.pcd
 
+#save files
+*.gpickle
+
 # default HSQL database files for production mode
 /prodDb.*
 

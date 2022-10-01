@@ -1,6 +1,3 @@
-
-from Fragment import FeatureLines
-import helper
 import open3d as o3d
 import numpy as np
 import scipy.spatial
@@ -54,16 +51,38 @@ class experiment(object):
         results_tmp = p_umap(self.run_test, self.tests_objects)
         self.results = pd.DataFrame(results_tmp)
 
+    def get_number(self,NumberString):
+        if NumberString.isdigit():
+            Number = int(NumberString)
+        else:
+            Number = float(NumberString)
+            if Number.is_integer():
+                Number = int(Number)
+
+        return Number
+
     def compile_string(self, string):
         string = str(string)
         fixed_number = re.compile("\d+(?:\.\d+)?")
         range_pattern = re.compile("range\(\d+(?:\.\d+)?,\d+(?:\.\d+)?,\d+(?:\.\d+)?\)")
-        random_pattern = re.compile("random\([+-]?([0-9]*[.])?[0-9]+,[+-]?([0-9]*[.])?[0-9]+\)")
+        random_pattern = re.compile("random\(\d+(?:\.\d+)?,\d+(?:\.\d+)?,\d+(?:\.\d+)?\)")
+        array_pattern = re.compile("array\(\[\d+(?:\.\d+)?,\d+(?:\.\d+)?,\d+(?:\.\d+)?\]\)")
+        my_values = []
         if range_pattern.match(string):
             start,end,step = re.findall(r"\d+(?:\.\d+)?", string, re.I)
             my_values = np.arange(float(start), float(end), float(step))
-        if fixed_number.match(string):
+        elif fixed_number.match(string):
             my_values = [float(string)]
+        elif random_pattern.match(string):
+            start,end,num = re.findall(r"\d+(?:\.\d+)?", string, re.I)
+            start = self.get_number(start)
+            end = self.get_number(end)
+            my_values = np.random.uniform(low=start, high=end, size=(int(num),))
+        elif array_pattern.match(string):
+            arr = re.findall(r"\d+(?:\.\d+)?", string, re.I)
+            my_values = [self.get_number(num) for num in arr]
+        else:
+            print("ERROR")
         return my_values
 
     def combination_creation(self, conf):
@@ -136,6 +155,7 @@ class experiment(object):
 
                 if key == "evaluation":
                     my_conf[key] = val
+            print(my_conf)
             return my_conf
 
 class test(object):

@@ -16,8 +16,8 @@ translation :
 piplines :
   - name : "pipline_1"
     para1: 15
-    para2: range(1,6,3)
-    para3: range(1,10,3)
+    para2: random(1,100,3)
+    para3: array([1,10,3])
     para4: range(1,10,3)
     para4: range(1,10,3)
 

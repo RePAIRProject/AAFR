@@ -1,0 +1,29 @@
+seed : 100
+
+#dataset folder
+data : "data_test"
+
+rotation :
+  x : 0
+  y : 1.14
+  z : 0.6
+
+translation :
+  x : 0
+  y : 10
+  z : 15
+
+piplines :
+  - name : "pipline_1"
+    para1: 15
+    para2: range(1,6,3)
+    para3: range(1,10,3)
+    para4: range(1,10,3)
+    para4: range(1,10,3)
+
+tests :
+  - name : "ICP_test"
+
+evaluation :
+  - rms
+  - new_eval

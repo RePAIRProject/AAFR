@@ -65,20 +65,18 @@ Obj1.show_heat(data)
 ```
 ![alt text](https://github.com/RePAIRProject/AAFR/blob/master/Trials/w_co.JPG)
 
+
+# Experiment module
 ## Default Defined patterns Creation
 
 ```python
-from helper import FeatureLines
+from runner import experiment
 
-# returns 'Object after the downsampling specified'
-Obj1 = FeatureLines("data/group19/fragment.ply",voxel_size=0.1)
+## load the config file for the expirments 
+my_expirments = experiment("conf1.yaml")
 
-# calculates all penalty functions after creating the graph where N = 16 (nearest neighbor)
-Obj1.init(16)
-# set the parameters as specified in the paper 
-# alpha, gamma,crease_threshold, and border_threshold and pattern_length_threshold 
-# pattern_length_T is set by default to half sqrt of the number of nodes
-Obj1.init_graph(alpha=0.9,gamma=0.5)
-Obj1.create_crease(T=1.4,pattern_length_T=2)
-Obj1.show_pattern(Obj1.crease_pattern_pruned)
+## run all expirments in parallel depending on the number of cores avaliable 
+my_expirments.run()
+## show results
+my_expirments.results
 ```

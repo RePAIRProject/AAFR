@@ -21,14 +21,26 @@ import itertools
 import re
 import yaml
 from yaml.loader import SafeLoader
-
+import datetime
 class experiment(object):
     """docstring for ."""
 
     def __init__(self, conf_file_name):
+        t = datetime.datetime.now()
+        time = t.strftime("[%d.%m.%y] Time - %H_%M_%S")
+        self.logs_file = open("logs/"+ time + ".log", "a+")
+
         self.conf_file_name = conf_file_name
+        self.log("conf file : "+self.conf_file_name)
         conf = self.read_conf(conf_file_name)
+        self.log("Configurations : "+str(conf))
         test_combinations = self.combination_creation(conf)
+        self.log("number of tests : "+str(len(test_combinations[0])))
+
+
+
+
+
         self.tests_objects = []
         for test_atts in test_combinations:
             for ((data,rot_tran),pipline),test_name in test_atts:
@@ -37,15 +49,28 @@ class experiment(object):
                 self.tests_objects.append(test(Obj1_url, Obj2_url,rot_tran, pipline_name,pipline_variables, test_name, conf["evaluation"] ))
 
     def run_test(self,test_obj):
-        evals = test_obj.run()
         result = {"obj1":test_obj.Obj1_url, "obj2":test_obj.Obj2_url,\
                 "pipeline":test_obj.pipline_name,"params":test_obj.pipline_variables,\
-                 "R & T":test_obj.init_R_T,  "transformation": test_obj.result_transformation,\
+                 "R & T":test_obj.init_R_T, \
                  "test":test_obj.test_name }
-        for key,val in evals.items():
-            result[key] = val
+        try:
+            evals = test_obj.run()
+            for key,val in evals.items():
+                result[key] = val
+
+            result["transformation"] = test_obj.result_transformation
+            result["status"] = "success"
+
+        except:
+            result["status"] = "Failed"
+        self.log(result)
         return result
 
+    def log(self,msg):
+        t = datetime.datetime.now()
+        time = t.strftime("\n [%d.%m.%y] Time - %H_%M_%S")
+        log_msg = str(msg)
+        self.logs_file.write(time+" : "+ log_msg)
 
     def run(self):
         results_tmp = p_umap(self.run_test, self.tests_objects)
@@ -72,7 +97,7 @@ class experiment(object):
             start,end,step = re.findall(r"\d+(?:\.\d+)?", string, re.I)
             my_values = np.arange(float(start), float(end), float(step))
         elif fixed_number.match(string):
-            my_values = [float(string)]
+            my_values = [self.get_number(string)]
         elif random_pattern.match(string):
             start,end,num = re.findall(r"\d+(?:\.\d+)?", string, re.I)
             start = self.get_number(start)
@@ -161,6 +186,9 @@ class experiment(object):
 class test(object):
 
     def __init__(self, Obj1_url, Obj2_url, init_R_T, pipline, pipline_variables, my_test, evaluation_list):
+        if not os.path.exists("pipline_modules/"+pipline+".py") :
+            print("Error !  cannot find "+pipline+" module in pipline_modules")
+
         self.Obj1_url = Obj1_url
         self.Obj2_url = Obj2_url
         self.pipline_variables = pipline_variables

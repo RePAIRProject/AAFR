@@ -203,16 +203,18 @@ class test(object):
         # try:
         Obj1 = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
         Obj2 = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
+        R,T = self.init_R_T
+        RM = Obj2.pcd.get_rotation_matrix_from_xyz(R)
         Obj2 = self.change_rotation_translation(Obj2,self.init_R_T)
         self.result_transformation = self.my_test.run(Obj1,Obj2)
-        return self.evalute(self.init_R_T,self.result_transformation)
+        return self.evalute((RM,T),self.result_transformation)
         # except:
         #     return -1,-1
 
-    def evalute(self,init_R_T,result_transformation):
+    def evalute(self,RotationMatrix_and_Translation,result_transformation):
         results = dict()
         for eval in self.evaluation_list:
-            tmp_res = eval.run(self.init_R_T,self.result_transformation)
+            tmp_res = eval.run(RotationMatrix_and_Translation,self.result_transformation)
             for key,val in tmp_res.items():
                 results[key] = val
         return  results

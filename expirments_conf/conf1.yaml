@@ -5,25 +5,24 @@ data : "data_test"
 
 rotation :
   x : 0
-  y : 1.14
-  z : 0.6
+  y : 0
+  z : 0
 
 translation :
   x : 0
-  y : 10
-  z : 15
+  y : 0
+  z : 0
 
 piplines :
   - name : "pipline_1"
     para1: 15
-    para2: random(1,100,3)
-    para3: array([1,10,3])
-    para4: range(1,10,3)
-    para4: range(1,10,3)
+    para2: random(1,10,2)
+    para3: array([1,10,5])
+    para4: range(1,10,5)
+    para4: range(1,10,5)
 
 tests :
   - name : "ICP_test"
 
 evaluation :
   - rms
-  - new_eval

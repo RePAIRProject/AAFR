@@ -185,7 +185,7 @@ class experiment(object):
 
 class test(object):
 
-    def __init__(self, Obj1_url, Obj2_url, init_R_T, pipline, pipline_variables, my_test, evaluation_list):
+    def __init__(self, Obj1_url, Obj2_url, init_R_T, pipline, pipline_variables, my_test, evaluation_list, show_results=False):
         if not os.path.exists("pipline_modules/"+pipline+".py") :
             print("Error !  cannot find "+pipline+" module in pipline_modules")
 
@@ -198,6 +198,7 @@ class test(object):
         self.my_pipline = importlib.import_module(str("pipline_modules."+pipline))
         self.my_test = importlib.import_module(str("test_modules."+my_test))
         self.evaluation_list = [importlib.import_module(str("evaluation_modules."+my_eval)) for my_eval in evaluation_list]
+        self.show_results = show_results
 
     def run(self):
         # try:
@@ -207,6 +208,8 @@ class test(object):
         RM = Obj2.pcd.get_rotation_matrix_from_xyz(R)
         Obj2 = self.change_rotation_translation(Obj2,self.init_R_T)
         self.result_transformation = self.my_test.run(Obj1,Obj2)
+        if self.show_results:
+            self.draw_registration_result_original_color(Obj1,Obj2,self.result_transformation)
         return self.evalute((RM,T),self.result_transformation)
         # except:
         #     return -1,-1
@@ -226,3 +229,9 @@ class test(object):
         Obj.pcd.rotate(RM, center=(0, 0, 0))
         Obj.pcd.translate((T[0], T[1], T[2]))
         return Obj
+
+    def draw_registration_result_original_color(self, obj1, obj2, transformation):
+        obj1.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in obj1.pcd.points]).astype(np.float))
+        obj2.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in obj2.pcd.points]).astype(np.float))
+        obj2.pcd.transform(transformation)
+        o3d.visualization.draw_geometries([obj2.pcd, obj1.pcd])

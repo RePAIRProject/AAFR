@@ -38,3 +38,10 @@
 
 # "temporary" build files
 /target
+
+# luca
+__pycache__/*
+.ipynb_checkpoints/*
+evaluation_modules/__pycache__/*
+pipline_modules/__pycache__/*
+test_modules/__pycache__/

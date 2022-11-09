@@ -11,15 +11,15 @@ rotation :
 translation :
   x : 0
   y : 10
-  z : 15
+  z : random(1,15,3)
 
 piplines :
   - name : "pipline_1"
     para1: 15
     para2: random(1,100,3)
-    para3: array([1,10,3])
-    para4: range(1,10,3)
-    para4: range(1,10,3)
+    para3: 2
+    para4: 2
+    para4: 2
 
 tests :
   - name : "ICP_test"
@@ -27,3 +27,5 @@ tests :
 evaluation :
   - rms
   - new_eval
+
+save_results: True

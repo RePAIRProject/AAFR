@@ -16,6 +16,7 @@ def load_cloud(url,voxel_size=0.1):
       downpcd = pcd.voxel_down_sample(voxel_size=voxel_size)
       pcd_tree = o3d.geometry.KDTreeFlann(downpcd)
       return downpcd,pcd_tree
+
 def remove_point(G,p,visited):
     counter = 0
     short_branches = []
@@ -50,7 +51,7 @@ def short_branch(G,p,visited,threshold):
                 visited.add(n)
                 stack.append(curr_branch+[n])
     return True
-def path_length(G,p,q,threshold):
+def path_length(G,p,q):
     counter = 0
     short_branches = []
     stack = [[p]]
@@ -74,7 +75,7 @@ def path_length(G,p,q,threshold):
                 stack.append(curr_branch+[n])
 
     return counter+1
-def prune_branches(Obj,F_lines,Graph,shortest_allowed_branch_length):
+def prune_branches(F_lines,Graph,shortest_allowed_branch_length):
     nodes = {}
     for branch in F_lines:
         for point in branch:
@@ -119,7 +120,7 @@ def create_graph(Obj, radius, shortest_cycle_length, smallest_isolated_island_le
                     ds.connect(q,int(idx))
                     Graph.add_edge(q,int(idx))
                 else:
-                    if path_length(Graph,int(idx),q,shortest_cycle_length+1)>shortest_cycle_length:
+                    if path_length(Graph,int(idx),q)>shortest_cycle_length:
                         ds.add(q,int(idx))
                         Graph.add_edge(q,int(idx))
             else:

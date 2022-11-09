@@ -26,9 +26,12 @@ class experiment(object):
     """docstring for ."""
 
     def __init__(self, conf_file_name):
+
+
         t = datetime.datetime.now()
         time = t.strftime("[%d.%m.%y] Time - %H_%M_%S")
         self.logs_file = open("logs/"+ time + ".log", "a+")
+        self.experiment_dir_name = None
 
         self.conf_file_name = conf_file_name
         self.log("conf file : "+self.conf_file_name)
@@ -37,28 +40,38 @@ class experiment(object):
         test_combinations = self.combination_creation(conf)
         self.log("number of tests : "+str(len(test_combinations[0])))
 
-
-
+        self.save_results = conf["save_results"]
+        if self.save_results:
+            date = datetime.datetime.now()
+            timestampStr = date.strftime("%d-%b-%Y__%H_%M_%S_%f")
+            self.experiment_dir_name = "experiment_"+timestampStr
+            path = os.path.join("results",self.experiment_dir_name)
+            os.mkdir(path)
 
 
         self.tests_objects = []
-        for test_atts in test_combinations:
-            for ((data,rot_tran),pipline),test_name in test_atts:
+        for test_atts in test_combinations :
+            for num,(((data,rot_tran),pipline),test_name) in enumerate(test_atts):
                 Obj1_url,Obj2_url = data
                 pipline_name,pipline_variables = pipline[0],pipline[1:]
-                self.tests_objects.append(test(Obj1_url, Obj2_url,rot_tran, pipline_name,pipline_variables, test_name, conf["evaluation"] ))
+
+                path = self.experiment_dir_name+"/test_"+test_name+str(num)
+                self.tests_objects.append(test(Obj1_url, Obj2_url,rot_tran, pipline_name,pipline_variables, test_name, conf["evaluation"], save_results = self.save_results, dir_name = path ))
 
     def run_test(self,test_obj):
         result = {"obj1":test_obj.Obj1_url, "obj2":test_obj.Obj2_url,\
                 "pipeline":test_obj.pipline_name,"params":test_obj.pipline_variables,\
                  "R & T":test_obj.init_R_T, \
                  "test":test_obj.test_name }
+
         try:
             evals = test_obj.run()
             for key,val in evals.items():
                 result[key] = val
 
             result["transformation"] = test_obj.result_transformation
+            if self.save_results:
+                result["dir"] = self.results_path.split("/")[-1]
             result["status"] = "success"
 
         except:
@@ -180,15 +193,29 @@ class experiment(object):
 
                 if key == "evaluation":
                     my_conf[key] = val
+
+                if key == "save_results":
+                    my_conf[key] = val
             print(my_conf)
             return my_conf
 
 class test(object):
 
-    def __init__(self, Obj1_url, Obj2_url, init_R_T, pipline, pipline_variables, my_test, evaluation_list, show_results=False):
+    def __init__(self, Obj1_url, Obj2_url, init_R_T, pipline, pipline_variables, my_test, evaluation_list, show_results=False, save_results=False, dir_name=None):
         if not os.path.exists("pipline_modules/"+pipline+".py") :
             print("Error !  cannot find "+pipline+" module in pipline_modules")
 
+        if save_results:
+            date = datetime.datetime.now()
+            timestampStr = date.strftime("%d-%b-%Y__%H_%M_%S_%f")
+            if not dir_name:
+                dir = "test_"+timestampStr
+                path = os.path.join("results", dir)
+            else:
+                path = os.path.join("results",dir_name)
+            self.results_path = path
+            if not os.path.exists(path):
+                os.mkdir(path)
         self.Obj1_url = Obj1_url
         self.Obj2_url = Obj2_url
         self.pipline_variables = pipline_variables
@@ -199,8 +226,10 @@ class test(object):
         self.my_test = importlib.import_module(str("test_modules."+my_test))
         self.evaluation_list = [importlib.import_module(str("evaluation_modules."+my_eval)) for my_eval in evaluation_list]
         self.show_results = show_results
+        self.save_results = save_results
 
     def run(self):
+
         # try:
         Obj1 = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
         Obj2 = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
@@ -210,6 +239,8 @@ class test(object):
         self.result_transformation = self.my_test.run(Obj1,Obj2)
         if self.show_results:
             self.draw_registration_result_original_color(Obj1,Obj2,self.result_transformation)
+        if self.save_results:
+            self.save_objects_with_registration(Obj1,Obj2,self.result_transformation)
         return self.evalute((RM,T),self.result_transformation)
         # except:
         #     return -1,-1
@@ -221,7 +252,6 @@ class test(object):
             for key,val in tmp_res.items():
                 results[key] = val
         return  results
-
 
     def change_rotation_translation(self,Obj,init_R_T):
         R,T = init_R_T
@@ -235,3 +265,10 @@ class test(object):
         obj2.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in obj2.pcd.points]).astype(np.float))
         obj2.pcd.transform(transformation)
         o3d.visualization.draw_geometries([obj2.pcd, obj1.pcd])
+
+    def save_objects_with_registration(self, obj1, obj2, transformation):
+        obj1.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in obj1.pcd.points]).astype(np.float))
+        obj2.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in obj2.pcd.points]).astype(np.float))
+        obj2.pcd.transform(transformation)
+        o3d.io.write_point_cloud(self.results_path+"/Obj1.ply", obj1.pcd, compressed=True)
+        o3d.io.write_point_cloud(self.results_path+"/Obj2.ply", obj2.pcd, compressed=True)

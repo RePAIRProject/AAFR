@@ -17,7 +17,7 @@ tiebreaker = count()
 class FeatureLines(object):
     """docstring for ."""
 
-    def __init__(self, url, voxel_size=0.1):
+    def __init__(self, url, voxel_size=30000):
         self.pcd,self.pcd_tree = helper.load_cloud(url,voxel_size)
 
     def init(self,num_points):

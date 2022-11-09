@@ -11,9 +11,34 @@ import matplotlib
 from collections import Counter
 from itertools import count
 
-def load_cloud(url,voxel_size=0.1):
+
+def down_sample_to(obj,num):
+    if len(obj.points) < num:
+        raise Exception("Sorry, num should be less than number of voxels in the objects")
+    diff = 0
+    answer = None
+    while not answer:
+        diff  += 0.01
+        right = 1
+        left = 0
+        curr = 0.5
+        curr_num = len(obj.points)
+        while right>left:
+            curr = float(right+left)/2
+            downpcd = obj.voxel_down_sample(voxel_size=curr)
+            if abs(len(downpcd.points)-num)/num < diff:
+                answer = curr
+                break
+            elif len(downpcd.points) < num:
+                right = curr - 0.0001
+            else:
+                left = curr
+    return answer
+
+def load_cloud(url,voxel_size=30000):
       pcd = o3d.io.read_point_cloud(url)
-      downpcd = pcd.voxel_down_sample(voxel_size=voxel_size)
+      voxel_percentage = down_sample_to(pcd,voxel_size)
+      downpcd = pcd.voxel_down_sample(voxel_size=voxel_percentage)
       pcd_tree = o3d.geometry.KDTreeFlann(downpcd)
       return downpcd,pcd_tree
 

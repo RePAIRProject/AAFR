@@ -206,6 +206,9 @@ class test(object):
             print("Error !  cannot find "+pipline+" module in pipline_modules")
 
         if save_results:
+            if not os.path.exists("results"):
+                os.mkdir("results")
+            
             date = datetime.datetime.now()
             timestampStr = date.strftime("%d-%b-%Y__%H_%M_%S_%f")
             if not dir_name:

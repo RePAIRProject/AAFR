@@ -17,22 +17,28 @@ def down_sample_to(obj,num):
         raise Exception("Sorry, num should be less than number of voxels in the objects")
     diff = 0
     answer = None
-    while not answer:
+    g_counter = 0
+    while not answer and g_counter<5:
+        g_counter+=1
         diff  += 0.01
         right = 1
         left = 0
         curr = 0.5
         curr_num = len(obj.points)
-        while right>left:
+        counter = 0
+
+        while right>left and counter<50:
+            counter+=1
             curr = float(right+left)/2
             downpcd = obj.voxel_down_sample(voxel_size=curr)
             if abs(len(downpcd.points)-num)/num < diff:
                 answer = curr
                 break
             elif len(downpcd.points) < num:
-                right = curr - 0.0001
+                right = curr - 0.000001
             else:
                 left = curr
+        answer = curr
     return answer
 
 def load_cloud(url,voxel_size=30000):
@@ -134,7 +140,9 @@ def create_graph(Obj, radius, shortest_cycle_length, smallest_isolated_island_le
     ds = DisjointSetExtra()
     Graph = nx.Graph()
     tree = o3d.geometry.KDTreeFlann(Obj.pcd)
-    for idx,p in enumerate(Obj.pcd.points):
+    radius = np.mean(self.points_u)
+    print("my radius is : ",radius)
+    for idx,p in enumerate(tqdm(Obj.pcd.points)):
         [k, points_q, _] = tree.search_radius_vector_3d(Obj.pcd.points[idx],radius)
         distance = np.abs(np.linalg.norm(p-np.asarray(Obj.pcd.points).take(points_q,axis=0),axis=1))
         arr1inds = distance.argsort()

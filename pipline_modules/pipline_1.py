@@ -13,16 +13,19 @@ import numpy as np
 def run(Obj_url, pipline_variables):
     (N, shortest_cycle_length, smallest_isolated_island_length, shortest_allowed_branch_length, thre) = pipline_variables
 
+    print("start")
     Obj = FeatureLines(Obj_url,voxel_size=30000)
     # print("Size :",len(Obj.pcd.points))
+    print("starting init")
     Obj.init(int(N))
+
+    print("starting threshold")
     valid = []
     for idx,val in enumerate(Obj.w_co):
         if val<thre:
             valid.append(idx)
 
     # print("Size valid :",len(valid))
-
 
     shortest_cycle_length = np.sqrt(len(Obj.pcd.points))//shortest_cycle_length
     smallest_isolated_island_length = np.sqrt(len(Obj.pcd.points))//smallest_isolated_island_length
@@ -32,6 +35,7 @@ def run(Obj_url, pipline_variables):
 
 
     Obj.pcd.points = o3d.utility.Vector3dVector(np.asarray(Obj.pcd.points)[valid])
+    print("create graph")
     isolated_islands_pruned_graph, F_lines, isolated_islands = helper.create_graph(Obj,\
     2,shortest_cycle_length, smallest_isolated_island_length)
     print("After graph",len([point for branch in F_lines for point in branch]))

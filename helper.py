@@ -140,7 +140,15 @@ def create_graph(Obj, radius, shortest_cycle_length, smallest_isolated_island_le
     ds = DisjointSetExtra()
     Graph = nx.Graph()
     tree = o3d.geometry.KDTreeFlann(Obj.pcd)
-    radius = np.mean(self.points_u)
+
+    pcd_tree = o3d.geometry.KDTreeFlann(Obj.pcd)
+    points_u = []
+    for i in range(len(Obj.pcd.points)):
+            point = Obj.pcd.points[i]
+            [k, idx, _] = pcd_tree.search_knn_vector_3d(point, 100)
+            q_points = np.asarray(Obj.pcd.points).take(idx,axis=0)
+            points_u.append(np.mean(np.abs(q_points[1:] - point)))
+    radius = np.mean(points_u)
     print("my radius is : ",radius)
     for idx,p in enumerate(tqdm(Obj.pcd.points)):
         [k, points_q, _] = tree.search_radius_vector_3d(Obj.pcd.points[idx],radius)

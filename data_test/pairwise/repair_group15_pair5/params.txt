@@ -1,0 +1,30 @@
+import numpy as np
+
+#objects
+Obj1_url ="data_test/pairwise/repair_group15_pair5/RPf_00098_gt.ply" 
+Obj2_url =  "data_test/pairwise/repair_group15_pair5/RPf_00099_gt.ply"
+
+#Before Evaluate do a Rotation and translation of
+init_R_T = [( 0 , 0.2, 0),( 0.2, 0.1, 0.1)]
+
+
+#pipline name and pipline parameters
+pipline_name = "pipline_1"
+
+N = 15
+t1 = 2
+t2 = 2
+t3 = 2
+
+
+#threshold for corner
+thre = 0.98
+
+pipline_variables = (N, t1, t2, t3, thre)
+
+#test
+test_name = "ICP_test"
+
+# eval 
+
+eval_list = ["rms"]

@@ -22,6 +22,8 @@ import re
 import yaml
 from yaml.loader import SafeLoader
 import datetime
+from copy import copy
+import pickle
 class experiment(object):
     """docstring for ."""
 
@@ -88,6 +90,9 @@ class experiment(object):
     def run(self):
         results_tmp = p_umap(self.run_test, self.tests_objects)
         self.results = pd.DataFrame(results_tmp)
+        if self.save_results:
+            path = os.path.join("results",self.experiment_dir_name,'results.csv')
+            self.results.to_csv(path)
 
     def get_number(self,NumberString):
         if NumberString.isdigit():
@@ -208,7 +213,7 @@ class test(object):
         if save_results:
             if not os.path.exists("results"):
                 os.mkdir("results")
-            
+
             date = datetime.datetime.now()
             timestampStr = date.strftime("%d-%b-%Y__%H_%M_%S_%f")
             if not dir_name:
@@ -234,16 +239,15 @@ class test(object):
     def run(self):
 
         # try:
-        Obj1 = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
-        Obj2 = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
+        self.Obj1 = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
+        self.Obj2 = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
         R,T = self.init_R_T
-        RM = Obj2.pcd.get_rotation_matrix_from_xyz(R)
-        Obj2 = self.change_rotation_translation(Obj2,self.init_R_T)
-        self.result_transformation = self.my_test.run(Obj1,Obj2)
+        RM = self.Obj2.pcd.get_rotation_matrix_from_xyz(R)
+        self.draw_registration_result_original_color(self.Obj1, self.Obj2, np.identity(4))
+        self.Obj2 = self.change_rotation_translation(self.Obj2,self.init_R_T)
+        self.result_transformation = self.my_test.run(self.Obj1,self.Obj2)
         if self.show_results:
-            self.draw_registration_result_original_color(Obj1,Obj2,self.result_transformation)
-        if self.save_results:
-            self.save_objects_with_registration(Obj1,Obj2,self.result_transformation)
+            self.show_after()
         return self.evalute((RM,T),self.result_transformation)
         # except:
         #     return -1,-1
@@ -264,6 +268,8 @@ class test(object):
         return Obj
 
     def draw_registration_result_original_color(self, obj1, obj2, transformation):
+        obj1.pcd = copy(obj1.pcd)
+        obj2.pcd = copy(obj2.pcd)
         obj1.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in obj1.pcd.points]).astype(np.float))
         obj2.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in obj2.pcd.points]).astype(np.float))
         obj2.pcd.transform(transformation)
@@ -275,3 +281,19 @@ class test(object):
         obj2.pcd.transform(transformation)
         o3d.io.write_point_cloud(self.results_path+"/Obj1.ply", obj1.pcd, compressed=True)
         o3d.io.write_point_cloud(self.results_path+"/Obj2.ply", obj2.pcd, compressed=True)
+
+    def show_before(self):
+        self.draw_registration_result_original_color(copy(self.Obj1), copy(self.Obj2), np.identity(4))
+    def show_after(self):
+        self.draw_registration_result_original_color(copy(self.Obj1),  copy(self.Obj2), self.result_transformation)
+
+
+    def save_test(self):
+        file = open(self.results_path+"/test.ply", 'wb')
+        pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
+        print("Test saved -> ", self.results_path+"/test.ply")
+
+
+    def load_test(self,url):
+        file = open(self.results_path+"/test.ply", 'wb')
+        self = pickle.load(file)

@@ -11,7 +11,7 @@ def run(Obj1,Obj2):
     current_transformation = np.identity(4)
 
     result_icp = o3d.pipelines.registration.registration_icp(
-        source,target,0.2, current_transformation,
+        source,target,20, current_transformation,
         o3d.pipelines.registration.TransformationEstimationPointToPoint(with_scaling =False),
         o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=50000000))
 

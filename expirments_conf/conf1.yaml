@@ -4,14 +4,14 @@ seed : 100
 data : "data_test/trial_1"
 
 rotation :
-  x : range(0.1,0.4,0.1)
-  y : range(0.1,0.4,0.1)
-  z : range(0.1,0.4,0.1)
+  x : 0
+  y : 0
+  z : 0
 
 translation :
-  x : range(0.1,0.4,0.1)
-  y : range(0.1,0.4,0.1)
-  z : range(0.1,0.4,0.1)
+  x : 0
+  y : 0
+  z : 0
 
 piplines :
   - name : "pipline_1"

@@ -91,8 +91,11 @@ class experiment(object):
         results_tmp = p_umap(self.run_test, self.tests_objects)
         self.results = pd.DataFrame(results_tmp)
         if self.save_results:
-            path = os.path.join("results",self.experiment_dir_name,'results.csv')
-            self.results.to_csv(path)
+            try:
+                path = os.path.join("results",self.experiment_dir_name,'results.csv')
+                self.results.to_csv(path)
+            except:
+                print("ERROR in saving results")
 
     def get_number(self,NumberString):
         if NumberString.isdigit():

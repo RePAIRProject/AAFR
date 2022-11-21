@@ -58,7 +58,7 @@ class experiment(object):
                 pipline_name,pipline_variables = pipline[0],pipline[1:]
 
                 path = self.experiment_dir_name+"/test_"+test_name+str(num)
-                self.tests_objects.append(test(Obj1_url, Obj2_url,rot_tran, pipline_name,pipline_variables, test_name, conf["evaluation"], save_results = self.save_results, dir_name = path ))
+                self.tests_objects.append(test(Obj1_url, Obj2_url,rot_tran, pipline_name,pipline_variables, test_name, conf["evaluation"], show_results=False, save_results = self.save_results, dir_name = path ))
 
     def run_test(self,test_obj):
         result = {"obj1":test_obj.Obj1_url, "obj2":test_obj.Obj2_url,\

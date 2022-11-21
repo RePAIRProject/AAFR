@@ -1,17 +1,17 @@
 seed : 100
 
 #dataset folder
-data : "data_test/brick"
+data : "data_test/trial_1"
 
 rotation :
-  x : range(0.1,0.6,0.1)
-  y : 0
-  z : 0
+  x : range(0.1,0.3,0.1)
+  y : range(0.1,0.3,0.1)
+  z : range(0.1,0.3,0.1)
 
 translation :
-  x : 0
-  y : random(1,10,3)
-  z : random(1,10,3)
+  x : range(0.1,0.3,0.1)
+  y : range(0.1,0.3,0.1)
+  z : range(0.1,0.3,0.1)
 
 piplines :
   - name : "pipline_1"
@@ -19,13 +19,12 @@ piplines :
     para2: 2
     para3: 2
     para4: 2
-    para5: 0.92
+    para5: 0.96
 
 tests :
   - name : "ICP_test"
 
 evaluation :
   - rms
-  - new_eval
 
 save_results: True

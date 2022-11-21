@@ -243,7 +243,6 @@ class test(object):
         self.Obj2 = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
         R,T = self.init_R_T
         RM = self.Obj2.pcd.get_rotation_matrix_from_xyz(R)
-        self.draw_registration_result_original_color(self.Obj1, self.Obj2, np.identity(4))
         self.Obj2 = self.change_rotation_translation(self.Obj2,self.init_R_T)
         self.result_transformation = self.my_test.run(self.Obj1,self.Obj2)
         if self.show_results:

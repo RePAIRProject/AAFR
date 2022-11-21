@@ -1,7 +1,7 @@
 from runner import experiment
 
 def main():
-    my_expirments = experiment("conf2.yaml")
+    my_expirments = experiment("conf3.yaml")
     my_expirments.run()
     print("finised !")
 

@@ -1,5 +1,0 @@
-,obj1,obj2,pipeline,params,R & T,test,R_error,T_error,transformation,status
-0,data_test/test\repair_group8_pair1\RPf_00059_gt.ply,data_test/test\repair_group8_pair1\RPf_00060_gt.ply,pipline_1,"(15, 2, 2, 2, 0.92)","((0, 0, 0), (0, 0, 0))",ICP_test,0.1802937163326078,9.733246375433525,"[[ 9.99889002e-01 -5.77408992e-03  1.37347681e-02  2.03542111e-01]
- [ 7.46336879e-03  9.91962549e-01 -1.26311518e-01 -4.10794145e+00]
- [-1.28950416e-02  1.26400005e-01  9.91895537e-01 -8.82153460e+00]
- [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  1.00000000e+00]]",Failed

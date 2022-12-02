@@ -1,0 +1,30 @@
+seed : 100
+
+#dataset folder
+data : "data_test/trial_1"
+
+rotation :
+  x : 0
+  y : 0
+  z : 0
+
+translation :
+  x : 0
+  y : 0
+  z : 0
+
+piplines :
+  - name : "pipline_1"
+    para1: 15
+    para2: 2
+    para3: 2
+    para4: 2
+    para5: 0.95
+
+tests :
+  - name : "ICP_test"
+
+evaluation :
+  - rms
+
+save_results: True

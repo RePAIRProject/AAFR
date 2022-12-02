@@ -13,7 +13,7 @@ from itertools import count
 from copy import copy
 import feature_piplines
 import importlib
-from p_tqdm import p_umap
+from p_tqdm import p_umap,p_uimap
 import os
 import os.path
 import pandas as pd
@@ -72,12 +72,13 @@ class experiment(object):
                 result[key] = val
 
             result["transformation"] = test_obj.result_transformation
-            if self.save_results:
-                result["dir"] = self.results_path.split("/")[-1]
+            if test_obj.save_results:
+                result["dir"] = test_obj.results_path.split("/")[-1]
             result["status"] = "success"
 
-        except:
+        except Exception as e:
             result["status"] = "Failed"
+            result["error"] = str(e)
         self.log(result)
         return result
 

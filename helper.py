@@ -42,11 +42,16 @@ def down_sample_to(obj,num):
     return answer
 
 def load_cloud(url,voxel_size=30000):
-      pcd = o3d.io.read_point_cloud(url)
-      voxel_percentage = down_sample_to(pcd,voxel_size)
-      downpcd = pcd.voxel_down_sample(voxel_size=voxel_percentage)
-      pcd_tree = o3d.geometry.KDTreeFlann(downpcd)
-      return downpcd,pcd_tree
+    try:
+        pcd = o3d.io.read_point_cloud(url)
+    except:
+        raise("problem in reading the 3d file -> "+url)
+
+    voxel_percentage = down_sample_to(pcd,voxel_size)
+    downpcd = pcd.voxel_down_sample(voxel_size=voxel_percentage)
+    pcd_tree = o3d.geometry.KDTreeFlann(downpcd)
+
+    return downpcd,pcd_tree
 
 def remove_point(G,p,visited):
     counter = 0

@@ -6,6 +6,16 @@
 # web application files
 /data
 
+
+# web application files
+/results
+/logs
+
+
+# processing files
+*.out
+*.txt
+
 #3dFiles
 *.ply
 *.pcd

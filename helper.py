@@ -184,3 +184,14 @@ def create_graph(Obj, radius, shortest_cycle_length, smallest_isolated_island_le
     Graph.remove_nodes_from(isolated_islands)
 
     return Graph, F_lines, isolated_islands
+
+
+def decompose(TRS):
+    T = TRS[:3,3]
+    S = np.eye(3)
+    S[0, 0],S[1, 1],S[2, 2] = np.linalg.norm(TRS[:3,0]),np.linalg.norm(TRS[:3,1]),np.linalg.norm(TRS[:3,2])
+    RS = TRS[0:3,0:3]
+    S_inv = np.linalg.inv(S)
+    R = np.matmul(RS,S_inv)
+    return R,T
+

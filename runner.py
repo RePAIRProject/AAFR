@@ -245,20 +245,35 @@ class test(object):
         # try:
         self.Obj1 = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
         self.Obj2 = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
+
+
+
         R,T = self.init_R_T
+        RM_trial = np.eye(4)
         RM = self.Obj2.pcd.get_rotation_matrix_from_xyz(R)
+        RM_trial[:3, :3] = RM
+        RM_trial[0, 3] = T[0]
+        RM_trial[1, 3] = T[1]
+        RM_trial[2, 3] = T[2]
+        print(RM_trial)
+
+        RM_ground = np.linalg.inv(RM_trial)
+
+        print(RM_ground)
         self.Obj2 = self.change_rotation_translation(self.Obj2,self.init_R_T)
-        self.result_transformation = self.my_test.run(self.Obj1,self.Obj2)
+        self.result_transformation_1,self.result_transformation_2 = self.my_test.run(self.Obj1,self.Obj2,RM_trial)
+        print(self.result_transformation_2)
+        # print(np.matmul(np.transpose(RM_trial),self.result_transformation_1))
         if self.show_results:
             self.show_after()
-        return self.evalute((RM,T),self.result_transformation)
+        return self.evalute(RM_ground,self.result_transformation_1)
         # except:
         #     return -1,-1
 
     def evalute(self,RotationMatrix_and_Translation,result_transformation):
         results = dict()
         for eval in self.evaluation_list:
-            tmp_res = eval.run(RotationMatrix_and_Translation,self.result_transformation)
+            tmp_res = eval.run(RotationMatrix_and_Translation,self.result_transformation_1)
             for key,val in tmp_res.items():
                 results[key] = val
         return  results

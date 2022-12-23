@@ -60,7 +60,7 @@ def knn_expand(Obj,my_borders,node_face,face_nodes,size):
     for i in range(len(Obj.pcd.points)):
             point = Obj.pcd.points[i]
             [k, idx, _] = tmp_tree.search_knn_vector_3d(point, 100)
-            q_points = np.asarray(tmp_pcd.points).take(idx,axis=0)
+            q_points = np.asarray(Obj.pcd.points).take(idx,axis=0)
             points_u.append(np.mean(np.abs(q_points[1:] - point)))
     radius = np.mean(points_u)
     print("KNN Radius : ",radius)

@@ -10,7 +10,7 @@ import random
 import matplotlib
 from collections import Counter
 from itertools import count
-
+from copy import copy
 
 def down_sample_to(obj,num):
     if len(obj.points) < num:
@@ -141,23 +141,34 @@ def prune_branches(F_lines,Graph,shortest_allowed_branch_length):
     valid_nodes = [[node for node in group-removed_nodes] for group in F_lines]
     return pruned_graph, removed_nodes, valid_nodes
 #Create the Graph
-def create_graph(Obj, radius, shortest_cycle_length, smallest_isolated_island_length):
+def create_graph(Obj, shortest_cycle_length, smallest_isolated_island_length,mask = None,radius=None):
     ds = DisjointSetExtra()
     Graph = nx.Graph()
     tree = o3d.geometry.KDTreeFlann(Obj.pcd)
-
-    pcd_tree = o3d.geometry.KDTreeFlann(Obj.pcd)
     points_u = []
-    for i in range(len(Obj.pcd.points)):
-            point = Obj.pcd.points[i]
-            [k, idx, _] = pcd_tree.search_knn_vector_3d(point, 100)
-            q_points = np.asarray(Obj.pcd.points).take(idx,axis=0)
-            points_u.append(np.mean(np.abs(q_points[1:] - point)))
-    radius = np.mean(points_u)
+
+    range_of_points = range(len(Obj.pcd.points))
+    tmp_tree = o3d.geometry.KDTreeFlann(Obj.pcd)
+    tmp_pcd = copy(Obj.pcd)
+    if mask:
+        range_of_points = mask
+        tmp_pcd.points = o3d.utility.Vector3dVector(np.asarray(tmp_pcd.points)[mask])
+        tmp_tree = o3d.geometry.KDTreeFlann(tmp_pcd)
+    if not radius:
+        for i in range_of_points:
+                point = Obj.pcd.points[i]
+                [k, idx, _] = tmp_tree.search_knn_vector_3d(point, 100)
+                q_points = np.asarray(tmp_pcd.points).take(idx,axis=0)
+                points_u.append(np.mean(np.abs(q_points[1:] - point)))
+        radius = np.mean(points_u)
     print("my radius is : ",radius)
-    for idx,p in enumerate(tqdm(Obj.pcd.points)):
+    arr = []
+    for idx in range_of_points:
         [k, points_q, _] = tree.search_radius_vector_3d(Obj.pcd.points[idx],radius)
-        distance = np.abs(np.linalg.norm(p-np.asarray(Obj.pcd.points).take(points_q,axis=0),axis=1))
+        if mask:
+            points_q = [i for i in points_q if i in mask]
+        arr.extend(points_q)
+        distance = np.abs(np.linalg.norm(Obj.pcd.points[idx]-np.asarray(Obj.pcd.points).take(points_q,axis=0),axis=1))
         arr1inds = distance.argsort()
         points_q_sorted = np.asarray(points_q)[arr1inds]
         for q in points_q_sorted:
@@ -172,7 +183,7 @@ def create_graph(Obj, radius, shortest_cycle_length, smallest_isolated_island_le
             else:
                 ds.add(q,int(idx))
                 Graph.add_edge(q,int(idx))
-
+    print(len(arr))
     F_lines = []
     isolated_islands = []
     for group in list(ds.ds.itersets()):
@@ -194,4 +205,3 @@ def decompose(TRS):
     S_inv = np.linalg.inv(S)
     R = np.matmul(RS,S_inv)
     return R,T
-

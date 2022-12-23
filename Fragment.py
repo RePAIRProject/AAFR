@@ -152,7 +152,7 @@ class FeatureLines(object):
     # W_co
     def cal_corner_penalty(self,points_eig_vals,points_eig_vecs):
         points_eig_vals = np.asarray(points_eig_vals)
-        w_points_corner = (points_eig_vals[:,2]-points_eig_vals[:,0])/points_eig_vals[:,2]
+        w_points_corner = (10*points_eig_vals[:,2]-points_eig_vals[:,0])/points_eig_vals[:,2]
         w_points_corner = self.NormalizeData(w_points_corner)
         return w_points_corner
 

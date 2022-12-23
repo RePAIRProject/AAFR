@@ -1,24 +1,24 @@
 import open3d as o3d
 import numpy as np
-
+from copy import copy
 def run(Obj1,Obj2,RT_Matrix):
-    source = Obj2.pcd
-    source.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in source.points]).astype(np.float))
+    transformations = []
+    for o1,obj1 in enumerate(Obj1):
+        for o2,obj2 in enumerate(Obj2):
 
-    target = Obj1.pcd
-    target.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in target.points]).astype(np.float))
+            target = copy(obj1.pcd)
+            source = copy(obj2.pcd)
 
-    current_transformation = RT_Matrix
+            # tf_param, _, _ = cpd.registration_cpd(copy(source), copy(target))
 
-    # result_icp_1 = o3d.pipelines.registration.registration_icp(
-    #     source,target,10000000, np.eye(4),
-    #     o3d.pipelines.registration.TransformationEstimationPointToPoint(with_scaling =False),
-    #     o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=50000000))
+            init_trans = np.eye(4)
+            # init_trans[:3, :3] = tf_param.rot
 
-    
-    result_icp_2 = o3d.pipelines.registration.registration_icp(
-            source,target,21, np.eye(4),
-            o3d.pipelines.registration.TransformationEstimationPointToPoint(with_scaling =False),
-            o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=500))
+            result_icp_2 = o3d.pipelines.registration.registration_icp(
+                    source,target,5000,init_trans,
+                    o3d.pipelines.registration.TransformationEstimationPointToPoint(with_scaling =False),
+                    o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=500))
 
-    return result_icp_2.transformation, result_icp_2.transformation
+            transformations.append(result_icp_2.transformation)
+
+    return transformations

@@ -22,7 +22,7 @@ import re
 import yaml
 from yaml.loader import SafeLoader
 import datetime
-from copy import copy
+from copy import copy,deepcopy
 import pickle
 class experiment(object):
     """docstring for ."""
@@ -234,7 +234,9 @@ class test(object):
         self.init_R_T = init_R_T
         self.pipline_name = pipline
         self.test_name = my_test
+        self.evaluation_list_names = evaluation_list
         self.my_pipline = importlib.import_module(str("pipline_modules."+pipline))
+
         self.my_test = importlib.import_module(str("test_modules."+my_test))
         self.evaluation_list = [importlib.import_module(str("evaluation_modules."+my_eval)) for my_eval in evaluation_list]
         self.show_results = show_results
@@ -243,10 +245,10 @@ class test(object):
     def run(self):
 
         # try:
-        self.Obj1 = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
-        self.Obj2 = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
-
-
+        print("_________________________First Object_________________________")
+        self.Obj1,self.Obj1_array = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
+        print("_________________________Second Object_________________________")
+        self.Obj2,self.Obj2_array = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
 
         R,T = self.init_R_T
         RM_trial = np.eye(4)
@@ -258,40 +260,53 @@ class test(object):
         print(RM_trial)
 
         RM_ground = np.linalg.inv(RM_trial)
+        self.RM_ground = RM_ground
 
         print(RM_ground)
+        print("_________________________Registeration_________________________")
         self.Obj2 = self.change_rotation_translation(self.Obj2,self.init_R_T)
-        self.result_transformation_1,self.result_transformation_2 = self.my_test.run(self.Obj1,self.Obj2,RM_trial)
-        print(self.result_transformation_2)
+        self.Obj2_array = self.change_rotation_translation(self.Obj2_array,self.init_R_T)
+        self.result_transformation_arr = self.my_test.run(self.Obj1_array,self.Obj2_array,RM_trial)
+
         # print(np.matmul(np.transpose(RM_trial),self.result_transformation_1))
-        if self.show_results:
-            self.show_after()
-        return self.evalute(RM_ground,self.result_transformation_1)
+        # if self.show_results:
+        #     self.show_after()
+
+        print("_________________________Evaluation_________________________")
+        self.results = [self.evalute(RM_ground,result_transformation) for result_transformation in self.result_transformation_arr]
+
+        return self.results
         # except:
         #     return -1,-1
 
     def evalute(self,RotationMatrix_and_Translation,result_transformation):
         results = dict()
         for eval in self.evaluation_list:
-            tmp_res = eval.run(RotationMatrix_and_Translation,self.result_transformation_1)
+            tmp_res = eval.run(RotationMatrix_and_Translation,result_transformation)
             for key,val in tmp_res.items():
                 results[key] = val
         return  results
 
-    def change_rotation_translation(self,Obj,init_R_T):
+    def change_rotation_translation(self,Obj_arr,init_R_T):
         R,T = init_R_T
-        RM = Obj.pcd.get_rotation_matrix_from_xyz((R[0], R[1], R[2]))
-        Obj.pcd.rotate(RM, center=(0, 0, 0))
-        Obj.pcd.translate((T[0], T[1], T[2]))
-        return Obj
-
+        if isinstance(Obj_arr, list):
+            for i in range(len(Obj_arr)):
+                RM = Obj_arr[i].pcd.get_rotation_matrix_from_xyz((R[0], R[1], R[2]))
+                Obj_arr[i].pcd.rotate(RM, center=(0, 0, 0))
+                Obj_arr[i].pcd.translate((T[0], T[1], T[2]))
+            return Obj_arr
+        else:
+            RM = Obj_arr.pcd.get_rotation_matrix_from_xyz((R[0], R[1], R[2]))
+            Obj_arr.pcd.rotate(RM, center=(0, 0, 0))
+            Obj_arr.pcd.translate((T[0], T[1], T[2]))
+            return Obj_arr
     def draw_registration_result_original_color(self, obj1, obj2, transformation):
-        obj1.pcd = copy(obj1.pcd)
-        obj2.pcd = copy(obj2.pcd)
-        obj1.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in obj1.pcd.points]).astype(np.float))
-        obj2.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in obj2.pcd.points]).astype(np.float))
-        obj2.pcd.transform(transformation)
-        o3d.visualization.draw_geometries([obj2.pcd, obj1.pcd])
+        pcd1 = deepcopy(obj1.pcd)
+        pcd2 = deepcopy(obj2.pcd)
+        pcd1.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in pcd1.points]).astype(np.float))
+        pcd2.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in pcd2.points]).astype(np.float))
+        pcd2.transform(transformation)
+        o3d.visualization.draw_geometries([pcd1, pcd2])
 
     def save_objects_with_registration(self, obj1, obj2, transformation):
         obj1.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in obj1.pcd.points]).astype(np.float))
@@ -307,11 +322,30 @@ class test(object):
 
 
     def save_test(self):
-        file = open(self.results_path+"/test.ply", 'wb')
-        pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
-        print("Test saved -> ", self.results_path+"/test.ply")
+        test_vars = [self.Obj1_url, self.Obj2_url, self.pipline_variables, self.init_R_T,\
+         self.pipline_name, self.test_name, self.my_test, self.evaluation_list_names, self.show_results, self.save_results,\
+         self.results_path, self.result_transformation_arr, self.results]
 
+        pipline_module = open(str("pipline_modules/"+self.pipline_name+".py"), "r")
+        test_vars.append(pipline_module.read())
+
+        test_module = open(str("test_modules/"+self.test_name+".py"), "r")
+        test_vars.append(test_module.read())
+
+
+        test_txt = open('my_ob', 'wb')
+        file = open('my_ob', 'wb')
+        pickle.dump(test_vars, file)
+        file.close()
 
     def load_test(self,url):
-        file = open(self.results_path+"/test.ply", 'wb')
-        self = pickle.load(file)
+        import sys,imp
+        self.Obj1_url, self.Obj2_url, self.pipline_variables, self.init_R_T,\
+        self.pipline_name, self.test_name, self.my_test, self.evaluation_list_names, self.show_results, self.save_results,\
+        self.results_path, self.result_transformation_arr, self.results, pipline_module_code, test_module_code = pickle.load(url)
+
+        self.pipline_module = imp.new_module(pipline_module_code)
+        exec(pipline_module_code, self.pipline_module.__dict__)
+
+        self.test_module = imp.new_module(test_module_code)
+        exec(test_module_code, self.test_module.__dict__)

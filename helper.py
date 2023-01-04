@@ -10,7 +10,7 @@ import random
 import matplotlib
 from collections import Counter
 from itertools import count
-from copy import copy
+from copy import copy, deepcopy
 
 def down_sample_to(obj,num):
     if len(obj.points) < num:
@@ -136,10 +136,10 @@ def prune_branches(F_lines,Graph,shortest_allowed_branch_length):
                 tmp_rem_nodes = remove_point(Graph,node,{point})
                 all_nodes_rem.extend(tmp_rem_nodes)
     removed_nodes = {node for branch in all_nodes_rem for node in branch}
-    pruned_graph = Graph
+    pruned_graph = deepcopy(Graph)
     pruned_graph.remove_nodes_from(list(removed_nodes))
     valid_nodes = [[node for node in group-removed_nodes] for group in F_lines]
-    return pruned_graph, removed_nodes, valid_nodes
+    return  pruned_graph, removed_nodes, valid_nodes
 #Create the Graph
 def create_graph(Obj, shortest_cycle_length, smallest_isolated_island_length,mask = None,radius=None):
     ds = DisjointSetExtra()
@@ -192,9 +192,10 @@ def create_graph(Obj, shortest_cycle_length, smallest_isolated_island_length,mas
         else:
             F_lines.append(group)
 
-    Graph.remove_nodes_from(isolated_islands)
+    isolated_islands_graph = deepcopy(Graph)
+    isolated_islands_graph.remove_nodes_from(isolated_islands)
 
-    return Graph, F_lines, isolated_islands
+    return isolated_islands_graph, F_lines, isolated_islands
 
 
 def decompose(TRS):

@@ -29,24 +29,19 @@ def get_sides(Graph, borders):
     faces = []
     all_visited = set()
     nodes = list(Graph.nodes)
-    shortest_cycle_length = np.sqrt(len(borders))//2
     while len(nodes):
         random_point = nodes.pop(0)
-        while random_point in all_visited or random_point in borders:
+        while random_point in all_visited:
             if not len(nodes):
                 sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
-                my_faces = []
-                for size,face in sorted_faces:
-                    if size>shortest_cycle_length:
-                        my_faces.append((size,face))
-                return my_faces
+                return sorted_faces[:10]
             random_point = nodes.pop(0)
 
         queue = [random_point]
         visited = set()
         while len(queue):
             point = queue.pop(0)
-            if point not in visited and point not in borders:
+            if point not in visited:
                 visited.add(point)
                 all_visited.add(point)
                 neighbors = Graph.neighbors(point)
@@ -56,11 +51,7 @@ def get_sides(Graph, borders):
                         queue.append(neighbor)
         faces.append((len(visited),visited))
     sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
-    my_faces = []
-    for size,face  in sorted_faces:
-        if size>shortest_cycle_length:
-            my_faces.append((size,face) )
-    return my_faces
+    return sorted_faces[:20]
 
 def knn_expand(Obj,my_borders,node_face,face_nodes,size):
 
@@ -139,7 +130,7 @@ def run(Obj_url,pipline_variables):
     tmp_Obj = copy(Obj)
     tmp_Obj.pcd = copy(Obj.pcd)
 
-    N = 100
+    N = 15
     t1 = 0.1
     t2 = 1
     t3 = 0.1
@@ -148,7 +139,7 @@ def run(Obj_url,pipline_variables):
     # print("Size valid :",len(valid))
     valid = []
     for idx,val in enumerate(tmp_Obj.w_co):
-        if val<thre:
+        if 0.6<val<0.96:
             valid.append(idx)
     print(len(valid))
     shortest_cycle_length = np.sqrt(len(valid))//shortest_cycle_length
@@ -168,7 +159,7 @@ def run(Obj_url,pipline_variables):
 
     border_nodes = [node for branch in valid_nodes for node in branch]
 
-    dilated_border = dilate_border(Obj,border_nodes,0.03)
+    dilated_border = dilate_border(Obj,border_nodes,0.01)
 
     print("borders dilated")
 
@@ -194,7 +185,7 @@ def run(Obj_url,pipline_variables):
     border_left_overs = left_overs+dilated_border
 
 
-    expanded_faces = knn_expand(Obj,border_left_overs,node_face,face_nodes,size=3)
+    expanded_faces = knn_expand(Obj,border_left_overs,node_face,face_nodes,size=5)
 
     print("expanded")
 

@@ -19,6 +19,8 @@ def run(Obj1,Obj2,RT_Matrix):
                     o3d.pipelines.registration.TransformationEstimationPointToPoint(with_scaling =False),
                     o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=500))
 
-            transformations.append(result_icp_2.transformation)
-
+            transformations.append((o1,o2,result_icp_2.transformation))
+            print("_________________________Registeration test_________________________")
+            print(o1,o2)
+            print(result_icp_2)
     return transformations

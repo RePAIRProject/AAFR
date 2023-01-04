@@ -10,9 +10,8 @@ from Fragment import FeatureLines
 from tqdm import tqdm
 import open3d as o3d
 import numpy as np
-
 import random
-import random
+from copy import deepcopy
 def dilate_border(my_obj,border,size):
     tmp_Obj = copy(my_obj)
     tmp_Obj.pcd = copy(my_obj.pcd)
@@ -29,19 +28,24 @@ def get_sides(Graph, borders):
     faces = []
     all_visited = set()
     nodes = list(Graph.nodes)
+    shortest_cycle_length = np.sqrt(len(borders))//2
     while len(nodes):
         random_point = nodes.pop(0)
-        while random_point in all_visited:
+        while random_point in all_visited or random_point in borders:
             if not len(nodes):
                 sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
-                return sorted_faces[:10]
+                my_faces = []
+                for size,face in sorted_faces:
+                    if size>shortest_cycle_length:
+                        my_faces.append((size,face))
+                return my_faces
             random_point = nodes.pop(0)
 
         queue = [random_point]
         visited = set()
         while len(queue):
             point = queue.pop(0)
-            if point not in visited:
+            if point not in visited and point not in borders:
                 visited.add(point)
                 all_visited.add(point)
                 neighbors = Graph.neighbors(point)
@@ -51,26 +55,19 @@ def get_sides(Graph, borders):
                         queue.append(neighbor)
         faces.append((len(visited),visited))
     sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
-    return sorted_faces[:20]
+    my_faces = []
+    for size,face  in sorted_faces:
+        if size>shortest_cycle_length:
+            my_faces.append((size,face) )
+    return my_faces
 
 def knn_expand(Obj,my_borders,node_face,face_nodes,size):
-
-    points_u = []
-    tmp_tree = o3d.geometry.KDTreeFlann(Obj.pcd)
-    for i in range(len(Obj.pcd.points)):
-            point = Obj.pcd.points[i]
-            [k, idx, _] = tmp_tree.search_knn_vector_3d(point, 100)
-            q_points = np.asarray(Obj.pcd.points).take(idx,axis=0)
-            points_u.append(np.mean(np.abs(q_points[1:] - point)))
-    radius = np.mean(points_u)
-    print("KNN Radius : ",radius)
     borders = deepcopy(my_borders)
     face_nodes_new = deepcopy(face_nodes)
     tree = o3d.geometry.KDTreeFlann(Obj.pcd)
     no_change = 0
     while borders:
         len_before = len(borders)
-
         idx = borders.pop(0)
         point = Obj.pcd.points[idx]
         [k, q_idxs, _] = tree.search_knn_vector_3d(point, size)
@@ -89,15 +86,19 @@ def knn_expand(Obj,my_borders,node_face,face_nodes,size):
             borders.append(idx)
         else:
             winner = max(my_faces, key=my_faces.get)
+            score = my_faces[winner]/sum(my_faces.values())
+#             if my_faces[winner]>40:
             face_nodes_new[winner].add(idx)
             node_face[idx] = winner
+#             else:
+#                 borders.append(idx)
 
         if len(borders) == len_before:
             no_change += 1
         else:
             no_change = 0
 
-        if no_change >= len_before+10000000:
+        if no_change >= len_before+100:
             break
     print(len(borders))
     return face_nodes_new
@@ -130,7 +131,7 @@ def run(Obj_url,pipline_variables):
     tmp_Obj = copy(Obj)
     tmp_Obj.pcd = copy(Obj.pcd)
 
-    N = 15
+    N = 100
     t1 = 0.1
     t2 = 1
     t3 = 0.1
@@ -139,7 +140,7 @@ def run(Obj_url,pipline_variables):
     # print("Size valid :",len(valid))
     valid = []
     for idx,val in enumerate(tmp_Obj.w_co):
-        if val<thre:
+        if val<0.9:
             valid.append(idx)
     print(len(valid))
     shortest_cycle_length = np.sqrt(len(valid))//shortest_cycle_length
@@ -159,7 +160,7 @@ def run(Obj_url,pipline_variables):
 
     border_nodes = [node for branch in valid_nodes for node in branch]
 
-    dilated_border = dilate_border(Obj,border_nodes,0.03)
+    dilated_border = dilate_border(Obj,border_nodes,0.01)
 
     print("borders dilated")
 

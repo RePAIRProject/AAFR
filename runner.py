@@ -24,6 +24,8 @@ from yaml.loader import SafeLoader
 import datetime
 from copy import copy,deepcopy
 import pickle
+np.random.seed(seed=0)
+
 class experiment(object):
     """docstring for ."""
 
@@ -273,7 +275,7 @@ class test(object):
         #     self.show_after()
 
         print("_________________________Evaluation_________________________")
-        self.results = [self.evalute(RM_ground,result_transformation) for result_transformation in self.result_transformation_arr]
+        self.results = [{**{"o1":o1, "o2":o2},**self.evalute(RM_ground,result_transformation)} for o1, o2, result_transformation in self.result_transformation_arr]
 
         return self.results
         # except:
@@ -303,14 +305,14 @@ class test(object):
     def draw_registration_result_original_color(self, obj1, obj2, transformation):
         pcd1 = deepcopy(obj1.pcd)
         pcd2 = deepcopy(obj2.pcd)
-        pcd1.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in pcd1.points]).astype(np.float))
-        pcd2.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in pcd2.points]).astype(np.float))
+        # pcd1.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in pcd1.points]).astype(np.float))
+        # pcd2.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in pcd2.points]).astype(np.float))
         pcd2.transform(transformation)
         o3d.visualization.draw_geometries([pcd1, pcd2])
 
     def save_objects_with_registration(self, obj1, obj2, transformation):
-        obj1.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in obj1.pcd.points]).astype(np.float))
-        obj2.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in obj2.pcd.points]).astype(np.float))
+        # obj1.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in obj1.pcd.points]).astype(np.float))
+        # obj2.pcd.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in obj2.pcd.points]).astype(np.float))
         obj2.pcd.transform(transformation)
         o3d.io.write_point_cloud(self.results_path+"/Obj1.ply", obj1.pcd, compressed=True)
         o3d.io.write_point_cloud(self.results_path+"/Obj2.ply", obj2.pcd, compressed=True)

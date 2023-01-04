@@ -131,7 +131,7 @@ def run(Obj_url,pipline_variables):
     tmp_Obj = copy(Obj)
     tmp_Obj.pcd = copy(Obj.pcd)
 
-    N = 100
+    N = 15
     t1 = 0.1
     t2 = 1
     t3 = 0.1
@@ -140,7 +140,7 @@ def run(Obj_url,pipline_variables):
     # print("Size valid :",len(valid))
     valid = []
     for idx,val in enumerate(tmp_Obj.w_co):
-        if val<0.9:
+        if val<thre:
             valid.append(idx)
     print(len(valid))
     shortest_cycle_length = np.sqrt(len(valid))//shortest_cycle_length

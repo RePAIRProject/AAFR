@@ -13,7 +13,7 @@ from itertools import count
 import helper
 # a global
 tiebreaker = count()
-
+np.random.seed(0)
 class FeatureLines(object):
     """docstring for ."""
 

@@ -10,8 +10,10 @@ from Fragment import FeatureLines
 from tqdm import tqdm
 import open3d as o3d
 import numpy as np
-import random
-from copy import deepcopy
+
+
+random.seed(0)
+np.random.seed(0)
 def dilate_border(my_obj,border,size):
     tmp_Obj = copy(my_obj)
     tmp_Obj.pcd = copy(my_obj.pcd)
@@ -28,24 +30,19 @@ def get_sides(Graph, borders):
     faces = []
     all_visited = set()
     nodes = list(Graph.nodes)
-    shortest_cycle_length = np.sqrt(len(borders))//2
     while len(nodes):
         random_point = nodes.pop(0)
-        while random_point in all_visited or random_point in borders:
+        while random_point in all_visited:
             if not len(nodes):
                 sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
-                my_faces = []
-                for size,face in sorted_faces:
-                    if size>shortest_cycle_length:
-                        my_faces.append((size,face))
-                return my_faces
+                return sorted_faces[:10]
             random_point = nodes.pop(0)
 
         queue = [random_point]
         visited = set()
         while len(queue):
             point = queue.pop(0)
-            if point not in visited and point not in borders:
+            if point not in visited:
                 visited.add(point)
                 all_visited.add(point)
                 neighbors = Graph.neighbors(point)
@@ -55,19 +52,26 @@ def get_sides(Graph, borders):
                         queue.append(neighbor)
         faces.append((len(visited),visited))
     sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
-    my_faces = []
-    for size,face  in sorted_faces:
-        if size>shortest_cycle_length:
-            my_faces.append((size,face) )
-    return my_faces
+    return sorted_faces[:20]
 
 def knn_expand(Obj,my_borders,node_face,face_nodes,size):
+
+    points_u = []
+    tmp_tree = o3d.geometry.KDTreeFlann(Obj.pcd)
+    for i in range(len(Obj.pcd.points)):
+            point = Obj.pcd.points[i]
+            [k, idx, _] = tmp_tree.search_knn_vector_3d(point, 100)
+            q_points = np.asarray(Obj.pcd.points).take(idx,axis=0)
+            points_u.append(np.mean(np.abs(q_points[1:] - point)))
+    radius = np.mean(points_u)
+    print("KNN Radius : ",radius)
     borders = deepcopy(my_borders)
     face_nodes_new = deepcopy(face_nodes)
     tree = o3d.geometry.KDTreeFlann(Obj.pcd)
     no_change = 0
     while borders:
         len_before = len(borders)
+
         idx = borders.pop(0)
         point = Obj.pcd.points[idx]
         [k, q_idxs, _] = tree.search_knn_vector_3d(point, size)
@@ -86,19 +90,15 @@ def knn_expand(Obj,my_borders,node_face,face_nodes,size):
             borders.append(idx)
         else:
             winner = max(my_faces, key=my_faces.get)
-            score = my_faces[winner]/sum(my_faces.values())
-#             if my_faces[winner]>40:
             face_nodes_new[winner].add(idx)
             node_face[idx] = winner
-#             else:
-#                 borders.append(idx)
 
         if len(borders) == len_before:
             no_change += 1
         else:
             no_change = 0
 
-        if no_change >= len_before+100:
+        if no_change >= len_before+10000000:
             break
     print(len(borders))
     return face_nodes_new
@@ -108,7 +108,7 @@ def run(Obj_url,pipline_variables):
     (N, shortest_cycle_length, smallest_isolated_island_length, shortest_allowed_branch_length, thre) = pipline_variables
 
     print("start")
-    Obj = FeatureLines(Obj_url,voxel_size=30000)
+    Obj = FeatureLines(Obj_url,voxel_size=10000)
     # print("Size :",len(Obj.pcd.points))
     print("starting init")
     Obj.init(int(N))
@@ -132,7 +132,7 @@ def run(Obj_url,pipline_variables):
     tmp_Obj.pcd = copy(Obj.pcd)
 
     N = 15
-    t1 = 0.1
+    t1 = 1
     t2 = 1
     t3 = 0.1
     pipline_variables = (N, t1, t2, t3, thre)
@@ -186,7 +186,7 @@ def run(Obj_url,pipline_variables):
     border_left_overs = left_overs+dilated_border
 
 
-    expanded_faces = knn_expand(Obj,border_left_overs,node_face,face_nodes,size=5)
+    expanded_faces = knn_expand(Obj,border_left_overs,node_face,face_nodes,size=15)
 
     print("expanded")
 

@@ -25,45 +25,58 @@ def dilate_border(my_obj,border,size):
         new_borders.extend(idx)
     return new_borders
 
+
+def find_dilattion_size(my_obj,border):
+    tmp_Obj = copy(my_obj)
+    tmp_Obj.pcd = copy(my_obj.pcd)
+    pcd_tree = o3d.geometry.KDTreeFlann(tmp_Obj.pcd)
+    w_co = copy(tmp_Obj.w_co)
+    size = 0
+    upper_size = 2
+    lower_size = 0
+    avg_number_ngh = 0
+    while lower_size < upper_size:
+        size = (lower_size+upper_size)/2.0
+        ngh = 0
+        for i,idx in enumerate(border):
+            point = tmp_Obj.pcd.points[idx]
+            [k, idx, _] = pcd_tree.search_radius_vector_3d(point,size)
+            ngh+=len(idx)
+        if abs(ngh-20*len(border))<5:
+                return size
+        elif ngh > 20*len(border):
+                upper_size = size-0.00000001
+        else:
+                lower_size = size
+    return size
+
 def get_sides(Graph, borders):
     faces = []
     all_visited = set()
     nodes = list(Graph.nodes)
-    shortest_cycle_length = np.sqrt(len(borders))//5
-    with tqdm(total=len(nodes)) as pbar:
-        while len(nodes):
+    while len(nodes):
+        random_point = nodes.pop(0)
+        while random_point in all_visited:
+            if not len(nodes):
+                sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
+                return sorted_faces[:10]
             random_point = nodes.pop(0)
-            while random_point in all_visited or random_point in borders:
-                if not len(nodes):
-                    sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
-                    my_faces = []
-                    for size,face in sorted_faces:
-                        if size>shortest_cycle_length:
-                            my_faces.append((size,face))
-                    return my_faces
-                random_point = nodes.pop(0)
 
-            queue = [random_point]
-            visited = set()
-            while len(queue):
-                point = queue.pop(0)
-                if point not in visited and point not in borders:
-                    visited.add(point)
-                    all_visited.add(point)
-                    neighbors = Graph.neighbors(point)
-                    pbar.update(len(list(copy(neighbors))))
-                    for neighbor in neighbors:
-                        all_visited.add(neighbor)
-                        if neighbor not in borders:
-                            queue.append(neighbor)
-            print(len(visited))
-            faces.append((len(visited),visited))
-        sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
-        my_faces = []
-        for size,face  in sorted_faces:
-            if size>shortest_cycle_length:
-                my_faces.append((size,face) )
-        return my_faces
+        queue = [random_point]
+        visited = set()
+        while len(queue):
+            point = queue.pop(0)
+            if point not in visited:
+                visited.add(point)
+                all_visited.add(point)
+                neighbors = Graph.neighbors(point)
+                for neighbor in neighbors:
+                    all_visited.add(neighbor)
+                    if neighbor not in borders:
+                        queue.append(neighbor)
+        faces.append((len(visited),visited))
+    sorted_faces = sorted(faces,key = lambda key:key[0], reverse = True)
+    return sorted_faces[:20]
 
 def knn_expand(Obj,my_borders,node_face,face_nodes,size):
 
@@ -113,35 +126,13 @@ def knn_expand(Obj,my_borders,node_face,face_nodes,size):
             break
     print(len(borders))
     return face_nodes_new
-def find_dilattion_size(my_obj,border):
-    tmp_Obj = copy(my_obj)
-    tmp_Obj.pcd = copy(my_obj.pcd)
-    pcd_tree = o3d.geometry.KDTreeFlann(tmp_Obj.pcd)
-    w_co = copy(tmp_Obj.w_co)
-    size = 0
-    upper_size = 2
-    lower_size = 0
-    avg_number_ngh = 0
-    while lower_size < upper_size:
-        size = (lower_size+upper_size)/2.0
-        ngh = 0
-        for i,idx in enumerate(border):
-            point = Obj.pcd.points[idx]
-            [k, idx, _] = pcd_tree.search_radius_vector_3d(point,size)
-            ngh+=len(idx)
-        if abs(ngh-20*len(border))<5:
-                return size
-        elif ngh > 20*len(border):
-                upper_size = size-0.00000001
-        else:
-                lower_size = size
+
 def run(Obj_url,pipline_variables):
 
     (N, shortest_cycle_length, smallest_isolated_island_length, shortest_allowed_branch_length, thre) = pipline_variables
 
     print("start")
-    print(Obj_url.split("_")[-1])
-    Obj = FeatureLines(Obj_url,"mesh",voxel_size=40000)
+    Obj = FeatureLines(Obj_url,"mesh",voxel_size=30000)
     # print("Size :",len(Obj.pcd.points))
     print("starting init")
     Obj.init(int(N))
@@ -155,6 +146,9 @@ def run(Obj_url,pipline_variables):
     isolated_islands_pruned_graph, F_lines, isolated_islands = helper.create_graph(Obj, \
     shortest_cycle_length, smallest_isolated_island_length)
     print("After graph",len([point for branch in F_lines for point in branch]))
+    pruned_graph_original, removed_nodes, valid_nodes = helper.prune_branches(F_lines,isolated_islands_pruned_graph,\
+    shortest_allowed_branch_length)
+    print("After Pruning",len([node for branch in valid_nodes for node in branch]))
 
     print("constructing borders")
 
@@ -162,40 +156,39 @@ def run(Obj_url,pipline_variables):
     tmp_Obj.pcd = copy(Obj.pcd)
 
     N = 15
-    t1 = 100
-    t2 = 100
-    t3 = 100
+    t1 = 0.1
+    t2 = 1
+    t3 = 0.1
     pipline_variables = (N, t1, t2, t3, thre)
     (N, shortest_cycle_length, smallest_isolated_island_length, shortest_allowed_branch_length, thre) = pipline_variables
     # print("Size valid :",len(valid))
     valid = []
     for idx,val in enumerate(tmp_Obj.w_co):
-        if  val<0.93:
+        if 0.6<val<0.96:
             valid.append(idx)
-    print(len(valid))
-    shortest_cycle_length = np.sqrt(len(Obj.pcd.points))/shortest_cycle_length
-    smallest_isolated_island_length = np.sqrt(len(Obj.pcd.points))/smallest_isolated_island_length
-    shortest_allowed_branch_length = np.sqrt(len(Obj.pcd.points))/shortest_allowed_branch_length
+    shortest_cycle_length = np.sqrt(len(valid))//shortest_cycle_length
+    smallest_isolated_island_length = np.sqrt(len(valid))//smallest_isolated_island_length
+    shortest_allowed_branch_length = np.sqrt(len(valid))//shortest_allowed_branch_length
     print("shortest_allowed_branch_length",shortest_allowed_branch_length)
     print("smallest_isolated_island_length",smallest_isolated_island_length)
     print("shortest_cycle_length",shortest_cycle_length)
-    isolated_islands_pruned_graph_border, F_lines, isolated_islands = helper.create_graph(tmp_Obj, \
+    isolated_islands_pruned_graph, F_lines, isolated_islands = helper.create_graph(tmp_Obj, \
     shortest_cycle_length, smallest_isolated_island_length,mask=valid,radius=None)
     print("After graph",len([point for branch in F_lines for point in branch]))
-    pruned_graph, removed_nodes, valid_nodes = helper.prune_branches(F_lines,isolated_islands_pruned_graph_border,\
+    pruned_graph, removed_nodes, valid_nodes = helper.prune_branches(F_lines,isolated_islands_pruned_graph,\
     shortest_allowed_branch_length)
-    print("After Pruning",len([node for branch in valid_nodes for node in branch if len(branch)>smallest_isolated_island_length]))
     print("After Pruning",len([node for branch in valid_nodes for node in branch]))
 
     print("dilation and segmentation")
 
     border_nodes = [node for branch in valid_nodes for node in branch]
 
-    dilated_border = dilate_border(Obj,border_nodes,0.004)
+    size = find_dilattion_size(Obj,border_nodes)
+    dilated_border = dilate_border(Obj,border_nodes,size)
 
     print("borders dilated")
 
-    dilated_faces = get_sides(isolated_islands_pruned_graph, dilated_border)
+    dilated_faces = get_sides(pruned_graph_original, dilated_border)
 
     print("got faces")
 

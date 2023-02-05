@@ -141,7 +141,12 @@ def run(Obj_url,pipline_variables):
 
     print("start")
     print(Obj_url.split("_")[-1])
-    Obj = FeatureLines(Obj_url,"mesh",voxel_size=40000)
+    if Obj_url.split("_")[-1] == "0.obj":
+        print("big object")
+        Obj = FeatureLines(Obj_url,"mesh",voxel_size=800000)
+    else:
+        print("small object")
+        Obj = FeatureLines(Obj_url,"mesh",voxel_size=80000)
     # print("Size :",len(Obj.pcd.points))
     print("starting init")
     Obj.init(int(N))
@@ -191,7 +196,7 @@ def run(Obj_url,pipline_variables):
 
     border_nodes = [node for branch in valid_nodes for node in branch]
 
-    dilated_border = dilate_border(Obj,border_nodes,0.004)
+    dilated_border = dilate_border(Obj,border_nodes,0.002)
 
     print("borders dilated")
 

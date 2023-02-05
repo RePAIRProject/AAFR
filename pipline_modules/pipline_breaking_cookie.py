@@ -141,7 +141,12 @@ def run(Obj_url,pipline_variables):
 
     print("start")
     print(Obj_url.split("_")[-1])
-    Obj = FeatureLines(Obj_url,"mesh",voxel_size=40000)
+    if Obj_url.split("_")[-1] == "0.obj":
+        print("big object")
+        Obj = FeatureLines(Obj_url,"mesh",voxel_size=80000)
+    else:
+        print("small object")
+        Obj = FeatureLines(Obj_url,"mesh",voxel_size=40000)
     # print("Size :",len(Obj.pcd.points))
     print("starting init")
     Obj.init(int(N))

@@ -248,9 +248,12 @@ class test(object):
 
         # try:
         print("_________________________First Object_________________________")
+
         self.Obj1,self.Obj1_array = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
         print("_________________________Second Object_________________________")
+
         self.Obj2,self.Obj2_array = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
+
 
         R,T = self.init_R_T
         RM_trial = np.eye(4)
@@ -259,12 +262,10 @@ class test(object):
         RM_trial[0, 3] = T[0]
         RM_trial[1, 3] = T[1]
         RM_trial[2, 3] = T[2]
-        print(RM_trial)
 
         RM_ground = np.linalg.inv(RM_trial)
         self.RM_ground = RM_ground
 
-        print(RM_ground)
         print("_________________________Registeration_________________________")
         self.Obj2 = self.change_rotation_translation(self.Obj2,self.init_R_T)
         self.Obj2_array = self.change_rotation_translation(self.Obj2_array,self.init_R_T)

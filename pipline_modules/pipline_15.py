@@ -98,7 +98,7 @@ def knn_expand(Obj,my_borders,node_face,face_nodes,size):
         else:
             no_change = 0
 
-        if no_change >= len_before+10000000:
+        if no_change >= 100:
             break
     print(len(borders))
     return face_nodes_new
@@ -107,8 +107,8 @@ def run(Obj_url,pipline_variables):
 
     (N, shortest_cycle_length, smallest_isolated_island_length, shortest_allowed_branch_length, thre) = pipline_variables
 
-    print("start")
-    Obj = FeatureLines(Obj_url,voxel_size=10000)
+    print("start pipline_15")
+    Obj = FeatureLines(Obj_url,voxel_size=30000)
     # print("Size :",len(Obj.pcd.points))
     print("starting init")
     Obj.init(int(N))
@@ -119,21 +119,22 @@ def run(Obj_url,pipline_variables):
     smallest_isolated_island_length = np.sqrt(len(Obj.pcd.points))//smallest_isolated_island_length
     shortest_allowed_branch_length = np.sqrt(len(Obj.pcd.points))//shortest_allowed_branch_length
 
-    isolated_islands_pruned_graph, F_lines, isolated_islands = helper.create_graph(Obj, \
+    isolated_islands_pruned_graph_original, F_lines, isolated_islands = helper.create_graph(Obj, \
     shortest_cycle_length, smallest_isolated_island_length)
-    print("After graph",len([point for branch in F_lines for point in branch]))
-    pruned_graph_original, removed_nodes, valid_nodes = helper.prune_branches(F_lines,isolated_islands_pruned_graph,\
-    shortest_allowed_branch_length)
-    print("After Pruning",len([node for branch in valid_nodes for node in branch]))
-
-    print("constructing borders")
+    # F_lines = [sorted(branch) for branch in F_lines]
+    # print("After graph",len([point for branch in F_lines for point in branch]))
+    # pruned_graph_original, removed_nodes, valid_nodes = helper.prune_branches(F_lines,isolated_islands_pruned_graph,\
+    # shortest_allowed_branch_length)
+    # print("After Pruning",len([node for branch in valid_nodes for node in branch]))
+    #
+    # print("constructing borders")
 
     tmp_Obj = copy(Obj)
     tmp_Obj.pcd = copy(Obj.pcd)
 
-    N = 15
-    t1 = 1
-    t2 = 1
+    N = N
+    t1 = 0.1
+    t2 = 2
     t3 = 0.1
     pipline_variables = (N, t1, t2, t3, thre)
     (N, shortest_cycle_length, smallest_isolated_island_length, shortest_allowed_branch_length, thre) = pipline_variables
@@ -142,7 +143,7 @@ def run(Obj_url,pipline_variables):
     for idx,val in enumerate(tmp_Obj.w_co):
         if val<thre:
             valid.append(idx)
-    print(len(valid))
+    print("valid - >",len(valid))
     shortest_cycle_length = np.sqrt(len(valid))//shortest_cycle_length
     smallest_isolated_island_length = np.sqrt(len(valid))//smallest_isolated_island_length
     shortest_allowed_branch_length = np.sqrt(len(valid))//shortest_allowed_branch_length
@@ -151,7 +152,12 @@ def run(Obj_url,pipline_variables):
     print("shortest_cycle_length",shortest_cycle_length)
     isolated_islands_pruned_graph, F_lines, isolated_islands = helper.create_graph(tmp_Obj, \
     shortest_cycle_length, smallest_isolated_island_length,mask=valid,radius=None)
+    print("__________________________________________________________________________")
+    F_lines = [sorted(branch) for branch in F_lines]
     print("After graph",len([point for branch in F_lines for point in branch]))
+
+    for i, branch in enumerate(F_lines):
+        print("branch ",i,len(branch))
     pruned_graph, removed_nodes, valid_nodes = helper.prune_branches(F_lines,isolated_islands_pruned_graph,\
     shortest_allowed_branch_length)
     print("After Pruning",len([node for branch in valid_nodes for node in branch]))
@@ -160,11 +166,17 @@ def run(Obj_url,pipline_variables):
 
     border_nodes = [node for branch in valid_nodes for node in branch]
 
-    dilated_border = dilate_border(Obj,border_nodes,0.01)
+    for branch in valid_nodes:
+        print(len(branch))
+
+
+    dilated_border = dilate_border(Obj,sorted(border_nodes),0.03)
 
     print("borders dilated")
 
-    dilated_faces = get_sides(pruned_graph_original, dilated_border)
+    dilated_faces = get_sides(isolated_islands_pruned_graph_original, dilated_border)
+
+
 
     print("got faces")
 

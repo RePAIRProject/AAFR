@@ -4,10 +4,10 @@ from copy import copy
 np.random.seed(0)
 def run(Obj1,Obj2,RT_Matrix):
     transformations = []
-    for o1,obj1 in enumerate(Obj1):
-        print(o1,len(obj1.pcd.points))
-    for o2,obj2 in enumerate(Obj2):
-        print(o2,len(obj2.pcd.points))
+    # for o1,obj1 in enumerate(Obj1):
+    #     print(o1,len(obj1.pcd.points))
+    # for o2,obj2 in enumerate(Obj2):
+    #     print(o2,len(obj2.pcd.points))
     for o1,obj1 in enumerate(Obj1):
         for o2,obj2 in enumerate(Obj2):
 

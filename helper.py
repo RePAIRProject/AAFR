@@ -15,7 +15,9 @@ random.seed(0)
 np.random.seed(0)
 def down_sample_to(obj,num):
     if len(obj.points) < num:
-        raise Exception("Sorry, num should be less than number of voxels in the objects")
+        print("num should be less than number of voxels in the objects, no down sampling will happen !")
+        num = len(obj.points)
+        print(num)
     diff = 0
     answer = None
     g_counter = 0
@@ -49,11 +51,25 @@ def load_cloud(url,voxel_size=30000):
         raise("problem in reading the 3d file -> "+url)
 
     voxel_percentage = down_sample_to(pcd,voxel_size)
+    print("my number is -> ",voxel_percentage)
     downpcd = pcd.voxel_down_sample(voxel_size=voxel_percentage)
     pcd_tree = o3d.geometry.KDTreeFlann(downpcd)
 
     return downpcd,pcd_tree
 
+def load_mesh(url,voxel_size=30000):
+    try:
+        mesh = o3d.io.read_triangle_mesh(url)
+        pcd = mesh.sample_points_uniformly(number_of_points=voxel_size)
+    except:
+        raise("problem in reading the 3d file -> "+url)
+
+    # voxel_percentage = down_sample_to(pcd,voxel_size)
+    # print("my number is -> ",voxel_percentage)
+    # downpcd = pcd.voxel_down_sample(voxel_size=voxel_percentage)
+    pcd_tree = o3d.geometry.KDTreeFlann(pcd)
+
+    return pcd,pcd_tree
 def remove_point(G,p,visited):
     counter = 0
     short_branches = []
@@ -117,7 +133,7 @@ def prune_branches(F_lines,Graph,shortest_allowed_branch_length):
     for branch in F_lines:
         for point in branch:
             neighbors = set(Graph.neighbors(point))
-            if len(list(neighbors)) >= 2:
+            if len(list(neighbors)) > 2:
                 nodes[point]=neighbors
 
     T = shortest_allowed_branch_length
@@ -137,10 +153,15 @@ def prune_branches(F_lines,Graph,shortest_allowed_branch_length):
                 tmp_rem_nodes = remove_point(Graph,node,{point})
                 all_nodes_rem.extend(tmp_rem_nodes)
     removed_nodes = {node for branch in all_nodes_rem for node in branch}
-    pruned_graph = deepcopy(Graph)
-    pruned_graph.remove_nodes_from(list(removed_nodes))
-    valid_nodes = [[node for node in group-removed_nodes] for group in F_lines]
-    return  pruned_graph, removed_nodes, valid_nodes
+    Graph.remove_nodes_from(list(removed_nodes))
+    valid_nodes = []
+    for group in F_lines:
+        new_group = []
+        for node in group:
+            if node not in removed_nodes:
+                new_group.append(node)
+        valid_nodes.append(new_group)
+    return  Graph, removed_nodes, valid_nodes
 #Create the Graph
 def create_graph(Obj, shortest_cycle_length, smallest_isolated_island_length,mask = None,radius=None):
     ds = DisjointSetExtra()

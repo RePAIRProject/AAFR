@@ -31,10 +31,10 @@ class FeatureLines(object):
         print("starting calculating atts")
         self.points_q_idxs, self.points_q_points, self.points_u, self.points_c, \
         self.points_eig_vecs, self.points_eig_vals, self.k_points,  = self.cal_all_points_main_atts(self.pcd,self.pcd_tree,num_points = self.num_points)
-
-        self.average_distance = np.linalg.norm(self.pcd.points  - np.mean(self.pcd.points,axis=0))
-
-        print("starting calculating w_co")
+        # 
+        # self.average_distance = np.linalg.norm(self.pcd.points  - np.mean(self.pcd.points,axis=0))
+        #
+        # print("starting calculating w_co")
         # self.w_cr_v = self.cal_crease_penalty_vector(self.points_eig_vals,self.points_eig_vecs)
         self.w_co = self.cal_corner_penalty(self.points_eig_vals,self.points_eig_vecs)
         # self.e_vectors_mag, self.e_vectors_dir = self.cal_p_q_vectors(self.pcd.points,self.points_q_points)

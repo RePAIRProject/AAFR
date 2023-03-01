@@ -132,7 +132,7 @@ def run(Obj_url,pipline_variables):
     (N, shortest_cycle_length, smallest_isolated_island_length, shortest_allowed_branch_length, thre) = pipline_variables
 
     print("start")
-    Obj = FeatureLines(Obj_url,"mesh",voxel_size=30000)
+    Obj = FeatureLines(Obj_url,voxel_size=30000)
     # print("Size :",len(Obj.pcd.points))
     print("starting init")
     Obj.init(int(N))
@@ -164,7 +164,7 @@ def run(Obj_url,pipline_variables):
     # print("Size valid :",len(valid))
     valid = []
     for idx,val in enumerate(tmp_Obj.w_co):
-        if 0.6<val<0.96:
+        if val<0.96:
             valid.append(idx)
     shortest_cycle_length = np.sqrt(len(valid))//shortest_cycle_length
     smallest_isolated_island_length = np.sqrt(len(valid))//smallest_isolated_island_length
@@ -184,7 +184,8 @@ def run(Obj_url,pipline_variables):
     border_nodes = [node for branch in valid_nodes for node in branch]
 
     size = find_dilattion_size(Obj,border_nodes)
-    dilated_border = dilate_border(Obj,border_nodes,size)
+    print(f"my size : {size}")
+    dilated_border = dilate_border(Obj,border_nodes,0.009)
 
     print("borders dilated")
 

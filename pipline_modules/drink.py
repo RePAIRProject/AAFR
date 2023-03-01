@@ -143,10 +143,10 @@ def run(Obj_url,pipline_variables):
     print(Obj_url.split("_")[-1])
     if Obj_url.split("_")[-1] == "0.obj":
         print("big object")
-        Obj = FeatureLines(Obj_url,"mesh",voxel_size=160000)
+        Obj = FeatureLines(Obj_url,"mesh",voxel_size=200000)
     else:
         print("small object")
-        Obj = FeatureLines(Obj_url,"mesh",voxel_size=90000)
+        Obj = FeatureLines(Obj_url,"mesh",voxel_size=100000)
     # print("Size :",len(Obj.pcd.points))
     print("starting init")
     Obj.init(int(N))
@@ -175,7 +175,7 @@ def run(Obj_url,pipline_variables):
     # print("Size valid :",len(valid))
     valid = []
     for idx,val in enumerate(tmp_Obj.w_co):
-        if  val<0.95:
+        if  val<0.93:
             valid.append(idx)
     print(len(valid))
     shortest_cycle_length = np.sqrt(len(valid))/shortest_cycle_length
@@ -196,7 +196,7 @@ def run(Obj_url,pipline_variables):
 
     border_nodes = [node for branch in valid_nodes for node in branch]
 
-    dilated_border = dilate_border(Obj,border_nodes,0.004)
+    dilated_border = dilate_border(Obj,border_nodes,0.008)
 
     print("borders dilated")
 

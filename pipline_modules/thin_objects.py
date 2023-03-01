@@ -196,7 +196,7 @@ def run(Obj_url,pipline_variables):
 
     border_nodes = [node for branch in valid_nodes for node in branch]
 
-    dilated_border = dilate_border(Obj,border_nodes,0.007)
+    dilated_border = dilate_border(Obj,border_nodes,0.008)
 
     print("borders dilated")
 

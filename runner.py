@@ -244,8 +244,44 @@ class test(object):
         self.show_results = show_results
         self.save_results = save_results
 
-    def run(self):
+    def process_fragments(self):
+        # try:
+        print("_________________________First Object_________________________")
+        self.Obj1,self.Obj1_array = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
+        print("_________________________Second Object_________________________")
+        self.Obj2,self.Obj2_array = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
 
+    def set_fragments_in_place(self, T_1, T_2):
+        """Move both objects"""
+        self.Obj1 = self.change_rotation_translation(self.Obj2,self.T_1)
+        self.Obj1_array = self.change_rotation_translation(self.Obj2_array,self.T_1)
+        self.Obj2 = self.change_rotation_translation(self.Obj2,self.T_2)
+        self.Obj2_array = self.change_rotation_translation(self.Obj2_array,self.T_2)
+
+    def set_gt_M(self, GT):
+        """Manually set the ground truth matrix"""
+        self.RM_ground = GT
+
+    def set_gt_R_T(self, R, T):
+        """Manually set the ground truth matrix (rotation and translation separate)"""
+        RM_ground = np.eye(4)
+        RM_ground[:3, :3] = R
+        RM_ground[:3, 3] = T
+        self.RM_ground = RM_ground
+
+    def register_fragments(self, init_T=np.eye(4)):
+        """Register fragments (apply T before registration, if given)"""
+        print("_________________________Registration_________________________")
+        self.result_transformation_arr = self.my_test.run(self.Obj1_array, \
+                                                          self.Obj2_array, \
+                                                          init_T)
+
+    def evaluate_results(self):
+        print("_________________________Evaluation_________________________")
+        self.results = [{**{"o1":o1, "o2":o2},**self.evalute(RM_ground,result_transformation)} for o1, o2, result_transformation in self.result_transformation_arr]
+
+
+    def run(self):
         # try:
         print("_________________________First Object_________________________")
 

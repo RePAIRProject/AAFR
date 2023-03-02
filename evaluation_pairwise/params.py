@@ -1,106 +1,24 @@
-objects = [
-    {
-    "Obj1_url":"/home/palma/Datasets/Breaking-bad-resampled-pairs/DrinkBottle/5e67380e99a257814e5292217a77cd7/fractured_70/piece_0.obj",
-    "Obj2_url":"/home/palma/Datasets/Breaking-bad-resampled-pairs/DrinkBottle/5e67380e99a257814e5292217a77cd7/fractured_70/piece_1.obj",
-    "small_object":100000,"large_object":200000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.008,"thre":0.93
-    },
-    {
-    "Obj1_url":"data_test/pairwise/breaking_bad_statue_pair1/breaking_bad_cat_statue_piece1.ply",
-    "Obj2_url":"data_test/pairwise/breaking_bad_statue_pair1/breaking_bad_cat_statue_piece2.ply",
-    "small_object":30000,"large_object":30000,
-    #to1,to2,to3 -> always fixed for the object creation (i fixed it for almost of them)
-    "to1":100 ,"to2":100, "to3":100,
-    #tb1,tb2,tb3 -> border paramters depend on the nature of the object
-    "tb1":0.1 ,"tb2":1, "tb3":0.1,
-    #dilation_size , thre -> size of the dilation and threshold applied depend on each object
-    "dilation_size":0.02,"thre":0.96},
-    {
-    "Obj1_url":"data_test/pairwise/breaking_bad_cat_artifact_pair2/breaking_bad_cat_artifact_piece2.ply",
-    "Obj2_url":"data_test/pairwise/breaking_bad_cat_artifact_pair2/breaking_bad_cat_artifact_piece3.ply",
-    "small_object":30000,"large_object":30000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":1, "tb3":0.1,
-    "dilation_size":0.02,"thre":0.96},
-    {
-    "Obj1_url":"data_test/pairwise/breaking_bad_cat_artifact_pair1/breaking_bad_cat_artifact_piece1.ply",
-    "Obj2_url":"data_test/pairwise/breaking_bad_cat_artifact_pair1/breaking_bad_cat_artifact_piece3.ply",
-    "small_object":30000,"large_object":30000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":1, "tb3":0.1,
-    "dilation_size":0.02,"thre":0.96},
-    {
-    "Obj1_url":"data_test/breaking_bad/mirror/7fe270a9cb7621ed157bba5da16c1cd3/mode_1/piece_0.obj",
-    "Obj2_url":"data_test/breaking_bad/mirror/7fe270a9cb7621ed157bba5da16c1cd3/mode_1/piece_1.obj",
-    "small_object":300000,"large_object":300000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.004,"thre":0.93
-    },
-     {
-    "Obj1_url":"data_test/breaking_bad/mug/fractured_73/piece_0.obj",
-    "Obj2_url":"data_test/breaking_bad/mug/fractured_73/piece_1.obj",
-    "small_object":300000,"large_object":300000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.01,"thre":0.93
-    },
-     {
-    "Obj1_url":"data_test/breaking_bad_2/Cookie/fractured_46/piece_0.obj",
-    "Obj2_url":"data_test/breaking_bad_2/Cookie/fractured_46/piece_1.obj",
-    "small_object":40000,"large_object":80000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":100 ,"tb2":100, "tb3":100,
-    "dilation_size":0.004,"thre":0.93
-    },
-     {
-    "Obj1_url":"data_test/breaking_bad_2/Cookie/fractured_52/piece_0.obj",
-    "Obj2_url":"data_test/breaking_bad_2/Cookie/fractured_52/piece_1.obj",
-    "small_object":40000,"large_object":80000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":100 ,"tb2":100, "tb3":100,
-    "dilation_size":0.004,"thre":0.93
-    },
-     {
-    "Obj1_url":"data_test/breaking_bad_2/Cookie/fractured_70/piece_0.obj",
-    "Obj2_url":"data_test/breaking_bad_2/Cookie/fractured_70/piece_1.obj",
-    "small_object":40000,"large_object":80000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":100 ,"tb2":100, "tb3":100,
-    "dilation_size":0.004,"thre":0.93
-    },
-     {
-    "Obj1_url":"data_test/breaking_bad/WineBottle/fractured_14/piece_0.obj",
-    "Obj2_url":"data_test/breaking_bad/WineBottle/fractured_14/piece_1.obj",
-    "small_object":40000,"large_object":100000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.006,"thre":0.97
-    },
-     {
-    "Obj1_url":"data_test/breaking_bad/WineBottle/fractured_3/piece_0.obj",
-    "Obj2_url":"data_test/breaking_bad/WineBottle/fractured_3/piece_1.obj",
-    "small_object":30000,"large_object":80000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.01,"thre":0.97
-    },
-     {
-    "Obj1_url":"data_test/breaking_bad/PillBottle/fractured_40/piece_0.obj",
-    "Obj2_url":"data_test/breaking_bad/PillBottle/fractured_40/piece_1.obj",
-    "small_object":100000,"large_object":200000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.01,"thre":0.95
-    },
-     {
-    "Obj1_url":"data_test/breaking_bad/DrinkBottle/fractured_62/piece_0.obj",
-    "Obj2_url":"data_test/breaking_bad/DrinkBottle/fractured_62/piece_1.obj",
-    "small_object":100000,"large_object":200000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.008,"thre":0.93
-    }
-]
+# config
+axis_angles = [45, 45, 45]
+from objects import objects
+object_number = 0
+#sampling
+large_object = objects[object_number]["large_object"]
+small_object = objects[object_number]["small_object"]
+N = 15
+Object_t1 = objects[object_number]["to1"]
+Object_t2 = objects[object_number]["to2"]
+Object_t3 = objects[object_number]["to3"]
+border_t1 = objects[object_number]["tb1"]
+border_t2 = objects[object_number]["tb1"]
+border_t3 = objects[object_number]["tb1"]
+#threshold for corner
+thre = objects[object_number]["thre"]
+dilation_size = objects[object_number]["dilation_size"]
+pipeline_variables = (small_object, large_object, N, Object_t1, Object_t2,
+                     Object_t3, border_t1, border_t2, border_t3, dilation_size, thre)
+pipeline_name = "general_pipeline"
+#test
+test_name = "ICP_test"
+# eval
+eval_list = ["rms"]

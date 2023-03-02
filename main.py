@@ -1,4 +1,4 @@
-from evaluation_pairwise.params import objects
+from evaluation_pairwise.objects import objects
 from evaluation_pairwise.utils import get_winner_pair, chamfer_distance
 import pandas as pd
 import ast

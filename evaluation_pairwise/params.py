@@ -1,10 +1,11 @@
 # config
 axis_angles = [45, 45, 45]
-from objects import objects
+from evaluation_pairwise.objects import objects
 object_number = 0
 #sampling
 large_object = objects[object_number]["large_object"]
 small_object = objects[object_number]["small_object"]
+
 N = 15
 Object_t1 = objects[object_number]["to1"]
 Object_t2 = objects[object_number]["to2"]

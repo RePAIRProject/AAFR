@@ -1,7 +1,10 @@
 import scipy
-from copy import copy
+from copy import copy, deepcopy
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
+import os
+import open3d as o3d
+import pandas as pd 
 
 def get_winner_pair(test):
 
@@ -67,3 +70,62 @@ def chamfer_distance(x, y, metric='l2', direction='bi'):
         raise ValueError("Invalid direction type. Supported types: \'y_x\', \'x_y\', \'bi\'")
 
     return chamfer_dist
+
+def save(name,test,number):
+
+    # Directory
+    directory = name
+
+    # Parent Directory path
+    parent_dir = "results/"
+
+    # Path
+    path = os.path.join(parent_dir, directory)
+    os.makedirs(path, exist_ok=True)
+    
+    path_error = os.path.join(path, "error.csv")
+    
+    df_test = pd.DataFrame(test.results)
+    df_test["total"] = df_test["R_error"]+df_test["T_error"]
+    df_test["transformations"] = [el[2] for el in test.result_transformation_arr]
+    df_test.to_csv(path_error, encoding='utf-8')
+    
+    idx = number
+    
+    
+    pcd1 = deepcopy(test.Obj1.pcd)
+    pcd2 = deepcopy(test.Obj2.pcd)
+    pcd1.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in pcd1.points]).astype("float"))
+    pcd2.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in pcd2.points]).astype("float"))
+    pcd2.transform(np.eye(4))
+    o3d.io.write_point_cloud(os.path.join(path, "Obj1_before.ply"), pcd1, compressed=True)
+    o3d.io.write_point_cloud(os.path.join(path, "Obj2_before.ply"), pcd2, compressed=True)
+
+    pcd2.transform(test.result_transformation_arr[idx][2])
+    o3d.io.write_point_cloud(os.path.join(path, "Obj1_after.ply"), pcd1, compressed=True)
+    o3d.io.write_point_cloud(os.path.join(path, "Obj2_after.ply"), pcd2, compressed=True)
+    print("saved")
+
+def save_arr(name,test):
+    import os
+    from copy import deepcopy
+    import open3d as o3d
+    # Directory
+    directory = name
+
+    # Parent Directory path
+    parent_dir = "results/"
+
+    # Path
+    path = os.path.join(parent_dir, directory)
+
+    os.makedirs(path, exist_ok=True)
+    for i,(obj1,obj2) in enumerate(zip(test.Obj1_array,test.Obj2_array)):
+        pcd1 = deepcopy(obj1.pcd)
+        pcd2 = deepcopy(obj2.pcd)
+        pcd1.colors = o3d.utility.Vector3dVector(np.asarray([(0,1,0) for _ in pcd1.points]).astype("float"))
+        pcd2.colors = o3d.utility.Vector3dVector(np.asarray([(0,0,1) for _ in pcd2.points]).astype("float"))
+        pcd2.transform(np.eye(4))
+        o3d.io.write_point_cloud(os.path.join(path, str(i)+"_Obj1.ply"), pcd1, compressed=True)
+        o3d.io.write_point_cloud(os.path.join(path, str(i)+"Obj2.ply"), pcd2, compressed=True)
+    print("saved")

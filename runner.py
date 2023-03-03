@@ -247,9 +247,9 @@ class test(object):
     def process_fragments(self):
         # try:
         print("_________________________First Object_________________________")
-        self.Obj1,self.Obj1_array = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
+        self.Obj1, self.Obj1_array = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
         print("_________________________Second Object_________________________")
-        self.Obj2,self.Obj2_array = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
+        self.Obj2, self.Obj2_array = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
 
     def set_fragments_in_place(self, T_1, T_2):
         """Move both objects"""

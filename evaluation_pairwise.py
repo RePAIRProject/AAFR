@@ -24,6 +24,9 @@ import open3d as o3d
 from evaluation_pairwise.objects import objects
 import evaluation_pairwise.params as params
 from runner import test
+import os 
+import numpy as np 
+import pdb 
 
 save_everything = True
 output_dir = os.path.join(os.getcwd(), 'output_evaluation_pairwise')
@@ -39,36 +42,55 @@ pcl1 = o3d.io.read_point_cloud(Obj1_url)
 pcl2 = o3d.io.read_point_cloud(Obj2_url)
 
 # initialize test object
-fragment_reassembler = test(Obj2_url, Obj1_url, np.eye(4), \
-                        params.pipeline_name, params.pipeline_variables, params.test_name, \
-                        params.eval_list, show_results = True, save_results=True)
+# fragment_reassembler = test(Obj2_url, Obj1_url, np.eye(4), \
+#                         params.pipeline_name, params.pipeline_variables, params.test_name, \
+#                         params.eval_list, show_results = True, save_results=True)
+#fragment_reassembler.process_fragments()
 
 # 2. place them at the origin
 # (obj1 at the origin, obj2 assembled to it):
-T_obj1_2_origin = - np.mean(np.asarray(pcl1.points), axis=1)
+T_obj1_2_origin = - np.mean(np.asarray(pcl1.points), axis=0)
+
 pcl1 = pcl1.translate(T_obj1_2_origin)
 pcl2 = pcl2.translate(T_obj1_2_origin)
-fragment_reassembler.set_fragments_in_place(T_obj1_2_origin, T_obj1_2_origin)
+#fragment_reassembler.set_fragments_in_place(T_obj1_2_origin, T_obj1_2_origin)
 if save_everything: # do this within test class in runner?
     o3d.io.write_point_cloud(os.path.join(output_dir, 'pcl1_gt.ply'), pcl1)
     o3d.io.write_point_cloud(os.path.join(output_dir, 'pcl2_gt.ply'), pcl2)
 
 # 3. get the ground truth transformation
-T_obj2_2_origin = - np.mean(np.asarray(pcl2.points), axis=1)
+T_obj2_2_origin = - np.mean(np.asarray(pcl2.points), axis=0)
 R_obj2_challenge = o3d.geometry.get_rotation_matrix_from_axis_angle(params.axis_angles)
 M_obj2_gt_2_challenge = np.eye(4)
 M_obj2_gt_2_challenge[:3, :3] = R_obj2_challenge
 M_obj2_gt_2_challenge[:3, 3] = T_obj2_2_origin
+o3d.visualization.draw_geometries([pcl1, pcl2], 'gt')
+#pcl2 = pcl2.translate(T_obj2_2_origin)
 pcl2 = pcl2.transform(M_obj2_gt_2_challenge)
-fragment_reassembler.set_fragments_in_place(np.eye(4), M_obj2_gt_2_challenge)
-GT_inv_M = np.eye(4)
-GT_inv_M[:3, :3] = np.transpose(R_obj2_challenge) # or np.linalg.inv ?
-GT_inv_M[:3, 3] = - T_obj2_2_origin
-fragment_reassembler.set_gt_M(GT_inv_M)
+o3d.visualization.draw_geometries([pcl1, pcl2], 'init')
+#fragment_reassembler.set_fragments_in_place(np.eye(4), M_obj2_gt_2_challenge)
+GT_inv_M = np.linalg.inv(M_obj2_gt_2_challenge) 
+#GT_inv_M[:3, 3] = GT_inv_M[:3, 3] / np.sum(np.abs(T_obj2_2_origin))
+# np.eye(4)
+# GT_inv_M[:3, :3] = np.linalg.inv(R_obj2_challenge) #np.transpose(R_obj2_challenge) # or  ?
+# GT_inv_M[:3, 3] = - T_obj2_2_origin
+#fragment_reassembler.set_gt_M(GT_inv_M)
 if save_everything: # do this within test class in runner?
     o3d.io.write_point_cloud(os.path.join(output_dir, 'pcl2_origin.ply'), pcl2)
     np.savetxt(os.path.join(output_dir, 'gt_inverse_transformation_obj2.json'), GT_inv_M)
 
+"""
+To 'solve' the alignment, you need to apply GT_inv_M to pcl2
+
+This code can be used to test the gt matrix is correct
+```
+print(M_obj2_gt_2_challenge)
+print(GT_inv_M)
+pcl2 = pcl2.transform(GT_inv_M)
+o3d.visualization.draw_geometries([pcl1, pcl2], 'solved')
+```
+"""
+pdb.set_trace()
 # 4. feed the pipeline with the two objects placed at the origin
 reassembly_candidates_results = fragment_reassembler.register_fragments(self, init_T=np.eye(4))
 # evaluate

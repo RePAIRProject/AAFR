@@ -10,9 +10,9 @@ from Fragment import FeatureLines
 from tqdm import tqdm
 import open3d as o3d
 import numpy as np
+import pdb 
+import random
 
-import random
-import random
 def dilate_border(my_obj,border,size):
     tmp_Obj = copy(my_obj)
     tmp_Obj.pcd = copy(my_obj.pcd)
@@ -113,6 +113,7 @@ def knn_expand(Obj,my_borders,node_face,face_nodes,size):
             break
     print(len(borders))
     return face_nodes_new
+
 def find_dilattion_size(my_obj,border):
     tmp_Obj = copy(my_obj)
     tmp_Obj.pcd = copy(my_obj.pcd)

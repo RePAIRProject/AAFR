@@ -19,9 +19,9 @@ class FeatureLines(object):
 
     def __init__(self, url, type = "cloud",voxel_size=30000):
         if type == "cloud":
-            self.pcd,self.pcd_tree = helper.load_cloud(url,voxel_size)
+            self.pcd, self.pcd_tree = helper.load_cloud(url,voxel_size)
         elif type == "mesh":
-            self.pcd,self.pcd_tree = helper.load_mesh(url,voxel_size)
+            self.pcd, self.pcd_tree = helper.load_mesh(url,voxel_size)
         else:
             raise Exception('wrong value : '+type)
 

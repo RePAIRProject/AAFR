@@ -51,6 +51,14 @@ objects = [
         "tb1":100 ,"tb2":100, "tb3":100,
         "dilation_size":0.004,"thre":0.93
     },
+    {
+        "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/DrinkBottle/fractured_62/piece_0.obj",
+        "Obj2_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/DrinkBottle/fractured_62/piece_1.obj",
+        "small_object":100000,"large_object":200000,
+        "to1":100 ,"to2":100, "to3":100,
+        "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
+        "dilation_size":0.008,"thre":0.93
+    },
     # initial ones
     {
         "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad_cat_artifact_pair2/breaking_bad_cat_artifact_piece2.ply",
@@ -68,37 +76,30 @@ objects = [
         "tb1":0.1 ,"tb2":1, "tb3":0.1,
         "dilation_size":0.02,"thre":0.96
     },
+    # waiting
+    #  {
+    # "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/WineBottle/fractured_14/piece_0.obj",
+    # "Obj2_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/WineBottle/fractured_14/piece_1.obj",
+    # "small_object":40000,"large_object":100000,
+    # "to1":100 ,"to2":100, "to3":100,
+    # "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
+    # "dilation_size":0.006,"thre":0.97
+    # },
+    #  {
+    # "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/WineBottle/fractured_3/piece_0.obj",
+    # "Obj2_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/WineBottle/fractured_3/piece_1.obj",
+    # "small_object":30000,"large_object":80000,
+    # "to1":100 ,"to2":100, "to3":100,
+    # "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
+    # "dilation_size":0.01,"thre":0.97
+    # },
+    #  {
+    # "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/PillBottle/fractured_40/piece_0.obj",
+    # "Obj2_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/PillBottle/fractured_40/piece_1.obj",
+    # "small_object":100000,"large_object":200000,
+    # "to1":100 ,"to2":100, "to3":100,
+    # "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
+    # "dilation_size":0.01,"thre":0.95
+    # },
 
-     {
-    "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/WineBottle/fractured_14/piece_0.obj",
-    "Obj2_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/WineBottle/fractured_14/piece_1.obj",
-    "small_object":40000,"large_object":100000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.006,"thre":0.97
-    },
-     {
-    "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/WineBottle/fractured_3/piece_0.obj",
-    "Obj2_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/WineBottle/fractured_3/piece_1.obj",
-    "small_object":30000,"large_object":80000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.01,"thre":0.97
-    },
-     {
-    "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/PillBottle/fractured_40/piece_0.obj",
-    "Obj2_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/PillBottle/fractured_40/piece_1.obj",
-    "small_object":100000,"large_object":200000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.01,"thre":0.95
-    },
-     {
-    "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/DrinkBottle/fractured_62/piece_0.obj",
-    "Obj2_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad/DrinkBottle/fractured_62/piece_1.obj",
-    "small_object":100000,"large_object":200000,
-    "to1":100 ,"to2":100, "to3":100,
-    "tb1":0.1 ,"tb2":0.1, "tb3":0.1,
-    "dilation_size":0.008,"thre":0.93
-    }
 ]

@@ -220,16 +220,16 @@ class test(object):
             if not os.path.exists("results"):
                 os.mkdir("results")
 
-            date = datetime.datetime.now()
-            timestampStr = date.strftime("%d-%b-%Y__%H_%M_%S_%f")
-            if not dir_name:
-                dir = "test_"+timestampStr
-                path = os.path.join("results", dir)
-            else:
-                path = os.path.join("results",dir_name)
-            self.results_path = path
-            if not os.path.exists(path):
-                os.mkdir(path)
+            # date = datetime.datetime.now()
+            # timestampStr = date.strftime("%d-%b-%Y__%H_%M_%S_%f")
+            # if not dir_name:
+            #     dir = "test_"+timestampStr
+            #     path = os.path.join("results", dir)
+            # else:
+            #     path = os.path.join("results",dir_name)
+            self.results_path = "results" #path
+            # if not os.path.exists(path):
+            #     os.mkdir(path)
         self.Obj1_url = Obj1_url
         self.Obj2_url = Obj2_url
         self.pipline_variables = pipline_variables
@@ -244,42 +244,7 @@ class test(object):
         self.show_results = show_results
         self.save_results = save_results
 
-    def process_fragments(self):
-        # try:
-        print("_________________________First Object_________________________")
-        self.Obj1, self.Obj1_array = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
-        print("_________________________Second Object_________________________")
-        self.Obj2, self.Obj2_array = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
-
-    def set_fragments_in_place(self, T_1, T_2):
-        """Move both objects"""
-        self.Obj1 = self.change_rotation_translation(self.Obj2,self.T_1)
-        self.Obj1_array = self.change_rotation_translation(self.Obj2_array,self.T_1)
-        self.Obj2 = self.change_rotation_translation(self.Obj2,self.T_2)
-        self.Obj2_array = self.change_rotation_translation(self.Obj2_array,self.T_2)
-
-    def set_gt_M(self, GT):
-        """Manually set the ground truth matrix"""
-        self.RM_ground = GT
-
-    def set_gt_R_T(self, R, T):
-        """Manually set the ground truth matrix (rotation and translation separate)"""
-        RM_ground = np.eye(4)
-        RM_ground[:3, :3] = R
-        RM_ground[:3, 3] = T
-        self.RM_ground = RM_ground
-
-    def register_fragments(self, init_T=np.eye(4)):
-        """Register fragments (apply T before registration, if given)"""
-        print("_________________________Registration_________________________")
-        self.result_transformation_arr = self.my_test.run(self.Obj1_array, \
-                                                          self.Obj2_array, \
-                                                          init_T)
-
-    def evaluate_results(self):
-        print("_________________________Evaluation_________________________")
-        self.results = [{**{"o1":o1, "o2":o2},**self.evalute(RM_ground,result_transformation)} for o1, o2, result_transformation in self.result_transformation_arr]
-
+    
 
     def run(self):
         # try:
@@ -388,3 +353,134 @@ class test(object):
 
         self.test_module = imp.new_module(test_module_code)
         exec(test_module_code, self.test_module.__dict__)
+
+
+class fragment_reassembler(object):
+    """
+    An extension of the test class with function for each step of the pipeline 
+    to debug and understand the codebase better and for further extension/modification
+    of the pipeline components 
+    """
+    def __init__(self, obj1_url, obj2_url, init_R_T, processing_pipeline, pipeline_variables, \
+                 registration_module, evaluation_list, show_results=False, save_results=False, dir_name=None):
+        if not os.path.exists("pipline_modules/"+pipeline+".py") :
+            print("Error !  cannot find "+pipline+" module in pipline_modules")
+
+        if save_results:
+            if not os.path.exists("results"):
+                os.mkdir("results")
+            # date = datetime.datetime.now()
+            # timestamp_str = date.strftime("%d-%b-%Y__%H_%M_%S_%f")
+            # if not dir_name:
+            #     dir_timestamp = "test_" + timestamp_str
+            #     path = os.path.join("results", dir_timestamp)
+            # else:
+            #     path = os.path.join("results",dir_name)
+            self.results_path = "results"
+            # if not os.path.exists(path):
+            #     os.mkdir(path)
+        self.pair_name = obj1_url.split('/')[-2]
+        self.obj1_url = obj1_url
+        self.obj2_url = obj2_url
+        self.pipeline_variables = pipeline_variables
+        self.init_R_T = init_R_T
+        self.pipeline_name = pipeline
+        self.registration_name = registration_module
+        self.evaluation_list_names = evaluation_list
+        self.processing_pipeline = importlib.import_module(str("pipline_modules."+processing_pipeline))
+        self.registration = importlib.import_module(str("test_modules."+registration_module))
+        self.evaluation_list = [importlib.import_module(str("evaluation_modules."+my_eval)) for my_eval in evaluation_list]
+        self.show_results = show_results
+        self.save_results = save_results
+
+    def process_fragments(self):
+        """Read and process fragments (breaking curve segmentation)"""
+        print("_________________________First Object_________________________")
+        self.Obj1, self.Obj1_array = self.processing_pipeline.run(self.Obj1_url,self.pipeline_variables)
+        print("_________________________Second Object_________________________")
+        self.Obj2, self.Obj2_array = self.processing_pipeline.run(self.Obj2_url,self.pipeline_variables)
+
+    def set_fragments_in_place(self, T_1, T_2):
+        """Move both objects"""
+        self.Obj1 = self.change_rotation_translation(self.Obj2,self.T_1)
+        self.Obj1_array = self.change_rotation_translation(self.Obj2_array,self.T_1)
+        self.Obj2 = self.change_rotation_translation(self.Obj2,self.T_2)
+        self.Obj2_array = self.change_rotation_translation(self.Obj2_array,self.T_2)
+
+    def apply_transformation(self, objects, T):
+        if isinstance(Obj_arr, list):
+            for i in range(len(Obj_arr)):
+                objects = objects[i].pcd.transform(T)
+            return objects
+        else:
+            objects = objects.pcd.transform(T)
+            return objects
+
+    def change_rotation_translation(self,Obj_arr,init_R_T):
+        R,T = init_R_T
+        if isinstance(Obj_arr, list):
+            for i in range(len(Obj_arr)):
+                RM = Obj_arr[i].pcd.get_rotation_matrix_from_xyz((R[0], R[1], R[2]))
+                Obj_arr[i].pcd.rotate(RM, center=(0, 0, 0))
+                Obj_arr[i].pcd.translate((T[0], T[1], T[2]))
+            return Obj_arr
+        else:
+            RM = Obj_arr.pcd.get_rotation_matrix_from_xyz((R[0], R[1], R[2]))
+            Obj_arr.pcd.rotate(RM, center=(0, 0, 0))
+            Obj_arr.pcd.translate((T[0], T[1], T[2]))
+            return Obj_arr
+
+    def show_fragments(self):
+        """Just visualize the fragments"""
+        o3d.visualization.draw_geometries([self.Obj1, self.Obj2], 'Fragments')
+
+    def save_fragments(self, output_dir, pcl_name=''):
+        """Save the fragments to ply files"""
+        o3d.io.write_point_cloud(os.path.join(output_dir, f'fragment1_{pcl_name}.ply'), self.Obj1)
+        o3d.io.write_point_cloud(os.path.join(output_dir, f'fragment2_{pcl_name}.ply'), self.Obj1)
+
+    def set_gt_M(self, GT):
+        """Manually set the ground truth matrix"""
+        self.RM_ground = GT
+
+    def set_gt_R_T(self, R, T):
+        """Manually set the ground truth matrix (rotation and translation separate)"""
+        RM_ground = np.eye(4)
+        RM_ground[:3, :3] = R
+        RM_ground[:3, 3] = T
+        self.RM_ground = RM_ground
+
+    def register_fragments(self, init_T=np.eye(4)):
+        """Register fragments (apply T before registration, if given)"""
+        print("_________________________Registration_________________________")
+        self.result_transformation_arr = self.registration.run(self.Obj1_array, self.Obj2_array, init_T)
+
+    def evaluate_results(self):
+        print("_________________________Evaluation_________________________")
+        self.results = [{**{"o1":o1, "o2":o2},**self.evaluate(self.RM_ground, result_transformation)} for o1, o2, result_transformation in self.result_transformation_arr]
+
+    def evaluate(self, gt_transf, estimated_transformation):
+        results = dict()
+        for eval_module in self.evaluation_list:
+            tmp_res = eval_module.run(gt_transf, estimated_transformation)
+            for key,val in tmp_res.items():
+                results[key] = val
+        return results
+
+    def get_winner(self, topk=5):
+        self.winner, self.sorted_results = sort_results(self)
+        print(f"Results (top {topk}):\n")
+        print(self.sorted_results.head(topk))
+        print("Winner:")
+        for k in self.winner.keys():
+            print(f"{k}: {self.winner[k]}")
+        
+    def save_results(self, save_all=True, save_parameters=True):
+        if not self.sorted_results:
+            self.get_winner()
+        path_error = os.path.join(self.results_path, f"error_{self.pair_name}.csv")
+        df_test = pd.DataFrame(self.sorted_results)
+        df_test["transformations"] = [el[2] for el in self.result_transformation_arr]
+        df_test.to_csv(path_error, encoding='utf-8')
+
+

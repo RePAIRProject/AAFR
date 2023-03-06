@@ -1,28 +1,32 @@
-from evaluation_pairwise.objects import objects
-from evaluation_pairwise.utils import get_winner_pair, chamfer_distance, save, save_arr
+from evaluation_pairwise.objects_03_06 import objects
+from evaluation_pairwise.utils import get_winner_pair, chamfer_distance, \
+    save, sort_results, save_parts
 import pandas as pd
 import ast
 from runner import test
 import numpy as np
-import pdb, json 
+import pdb, json, os
 
+prefix_run = 'LONG_RUN_03_06'
 for object_number in range(len(objects)):
-
-    with open(f'results/json/parameters_{object_number}.json', 'w') as jp:
-        json.dump(objects[object_number], jp, indent=2)
 
     #objects
     Obj1_url = objects[object_number]["Obj1_url"]
     Obj2_url = objects[object_number]["Obj2_url"]
     print(Obj1_url,Obj2_url)
-
+    pair_name = Obj1_url.split('/')[-2]
+    f_name = f'{prefix_run}_{pair_name}'
+    output_dir = os.path.join('results', f_name)
+    os.makedirs(output_dir, exist_ok=True)
+    with open(f'{output_dir}/parameters_{pair_name}.json', 'w') as jp:
+        json.dump(objects[object_number], jp, indent=2)
     #Before Evaluate do a Rotation and translation of
     init_R_T = ((0.2, 0.2, 0.1), (-0.5, -0.5, -0.5))
 
     #pipline name and pipline parameters
     pipline_name = "general_pipeline"
 
-    #sampling
+    #sampling print(f'saved in {output_dir}')
     large_object = objects[object_number]["large_object"]
     small_object = objects[object_number]["small_object"]
 
@@ -49,17 +53,29 @@ for object_number in range(len(objects)):
     # eval
     eval_list = ["rms"]
 
-    test_breaking_thin = test(Obj2_url, Obj1_url, init_R_T, pipline_name, pipline_variables, test_name, eval_list, show_results = True, save_results=True)
+    test_bbad = test(Obj2_url, Obj1_url, init_R_T, pipline_name, pipline_variables, test_name, eval_list, show_results = True, save_results=True)
 
-    my_results = test_breaking_thin.run()
-    sorted_results = get_winner_pair(test_breaking_thin)
-    #print(sorted_results[0])
-    df_breaking_3 = pd.DataFrame(test_breaking_thin.results)
-    df_breaking_3["total"] = df_breaking_3["R_error"]+df_breaking_3["T_error"]
-    df_breaking_3.sort_values('T_error')
-    df_breaking_3.to_csv(f'results/csv/results_{object_number}.csv')
+    my_results = test_bbad.run()
 
-    save_arr(f'results_array_{object_number}', test_breaking_thin)
-    save(f'results_single_{object_number}', test_breaking_thin, object_number)
+    winner, sorted_results = sort_results(test_bbad)
+    sorted_results.to_csv(f'{output_dir}/results_{pair_name}_sorted.csv')
+    with open(f'{output_dir}/winner_{pair_name}.json', 'w') as jp:
+        json.dump(winner, jp, indent=2)
 
-    #test_breaking_thin.draw_registration_result_original_color(test_breaking_thin.Obj1,test_breaking_thin.Obj2,test_breaking_thin.result_transformation_arr[5][2])
+    save(output_dir, test_bbad, winner['index'])
+
+    root_path = os.path.join(output_dir, "segmented_parts")
+    parts_obj1_path = os.path.join(root_path, "obj1")
+    parts_obj2_path = os.path.join(root_path, "obj2")
+    save_parts(test_bbad.Obj1_array, parts_obj1_path, 'obj1')
+    save_parts(test_bbad.Obj2_array, parts_obj2_path, 'obj2')
+   
+
+    print(f"Results (top {5}):\n")
+    print(sorted_results.head(5))
+    print("Winner:")
+    for k in winner.keys():
+        print(f"{k}: {winner[k]}")
+
+    print(f'\nsaved in {output_dir}\n')
+    # test_breaking_thin.draw_registration_result_original_color(test_breaking_thin.Obj1,test_breaking_thin.Obj2,test_breaking_thin.result_transformation_arr[5][2])

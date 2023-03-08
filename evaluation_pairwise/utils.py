@@ -28,7 +28,8 @@ def sort_results(reassembly):
                     "o2":o2, \
                     "R":R_error, \
                     "T":T_error, \
-                    "CD":chamfer_value})
+                    "CD":chamfer_value, \
+                    "M": R_T})
         if winner_value>chamfer_value:
             winner_index = i
             winner_value = chamfer_value
@@ -39,8 +40,10 @@ def sort_results(reassembly):
         "o2":reassembly.results[winner_index]['o2'], \
         "R":reassembly.results[winner_index]['R_error'], \
         "T":reassembly.results[winner_index]['T_error'], \
-        "CD":chamfer_value
+        "CD":winner_value,
+        "M":R_T.tolist()
     }
+
     results_df = pd.DataFrame(arr)
     return winner, results_df.sort_values('CD')
     

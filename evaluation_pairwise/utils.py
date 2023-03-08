@@ -40,7 +40,7 @@ def sort_results(reassembly):
         "o2":reassembly.results[winner_index]['o2'], \
         "R":reassembly.results[winner_index]['R_error'], \
         "T":reassembly.results[winner_index]['T_error'], \
-        "CD":winner_value,
+        "CD":winner_value, \
         "M":R_T.tolist()
     }
 

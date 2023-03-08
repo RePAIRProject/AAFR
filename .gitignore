@@ -57,5 +57,5 @@ evaluation_modules/__pycache__/*
 pipline_modules/__pycache__/*
 test_modules/__pycache__/
 evaluation_pairwise/__pycache__/*
-
+objects/__pycache__/*
 .venv/

@@ -1,4 +1,4 @@
-from objects.objects_experiments import objects
+from objects.objects_03_06 import objects
 from evaluation_pairwise.utils import get_winner_pair, chamfer_distance, \
     save, sort_results, save_parts
 import pandas as pd
@@ -7,7 +7,7 @@ from runner import test
 import numpy as np
 import pdb, json, os
 
-prefix_run = 'ALI_08_06'
+prefix_run = 'cookies_small_08_06'
 for object_number in range(len(objects)):
 
     #objects

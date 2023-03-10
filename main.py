@@ -1,4 +1,4 @@
-from objects.objects_03_06 import objects
+from objects.objects_quick import objects
 from evaluation_pairwise.utils import get_winner_pair, chamfer_distance, \
     save, sort_results, save_parts
 import pandas as pd
@@ -7,7 +7,7 @@ from runner import test
 import numpy as np
 import pdb, json, os
 
-prefix_run = 'cookies_small_08_06'
+prefix_run = 'TT_08_06'
 for object_number in range(len(objects)):
 
     #objects
@@ -48,7 +48,7 @@ for object_number in range(len(objects)):
                         Object_t3, border_t1, border_t2, border_t3, dilation_size, thre)
 
     #test
-    test_name = "ICP_test"
+    test_name = "teaser_arr"
 
     # eval
     eval_list = ["rms"]

@@ -1,4 +1,4 @@
-from evaluation_pairwise.repair_objects import objects
+from objects.repair_objects import objects
 from evaluation_pairwise.utils import get_winner_pair, chamfer_distance, \
     save, sort_results, save_parts
 import pandas as pd
@@ -7,7 +7,7 @@ from runner import test
 import numpy as np
 import pdb, json, os
 
-prefix_run = 'REPAIR_08_06'
+prefix_run = 'REPAIR_LARGE_03_13'
 for object_number in range(len(objects)):
 
     #objects

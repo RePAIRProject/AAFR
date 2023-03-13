@@ -1,4 +1,4 @@
-from evaluation_pairwise.other_datasets import objects
+from objects.other_datasets import objects
 from evaluation_pairwise.utils import get_winner_pair, chamfer_distance, \
     save, sort_results, save_parts
 import pandas as pd
@@ -7,7 +7,7 @@ from runner import test
 import numpy as np
 import pdb, json, os
 
-prefix_run = 'OTHER_DS_04_06'
+prefix_run = 'OTHER_DATASET_03_13'
 for object_number in range(len(objects)):
 
     #objects

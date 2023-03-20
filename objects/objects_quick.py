@@ -1,4 +1,4 @@
-p_size = 1000
+p_size = 10000
 objects = [
     {
         "Obj1_url":"/media/lucap/big_data/datasets/pairwise/breaking_bad_cat_artifact_pair2/breaking_bad_cat_artifact_piece2.ply",

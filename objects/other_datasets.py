@@ -1,9 +1,9 @@
-small = 150000
-large = 150000
-to = 100
-tb = 0.1
-dil = 0.04
-thre = 0.98
+small = 10000
+large = 10000
+to = 1
+tb = 50
+dil = 0.005
+thre = 0.985
 objects = [
     {
         "Obj1_url":"/media/lucap/big_data/datasets/pairwise/tuwien_brick_pair1/brick_part01.ply",

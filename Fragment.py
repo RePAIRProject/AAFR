@@ -28,7 +28,7 @@ class FeatureLines(object):
     def init(self,num_points):
 
         self.num_points = num_points
-        print("starting calculating atts")
+        #print("starting calculating atts")
         self.points_q_idxs, self.points_q_points, self.points_u, self.points_c, \
         self.points_eig_vecs, self.points_eig_vals, self.k_points,  = self.cal_all_points_main_atts(self.pcd,self.pcd_tree,num_points = self.num_points)
         # 

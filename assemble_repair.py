@@ -7,7 +7,7 @@ from runner import test
 import numpy as np
 import pdb, json, os
 
-prefix_run = 'REPAIR_LARGE_03_13'
+prefix_run = 'REPAIR_v2_03_14'
 for object_number in range(len(objects)):
 
     #objects

@@ -246,14 +246,15 @@ class test(object):
 
     
 
-    def run(self):
+    def run(self, folder_path=''):
         # try:
         print("_________________________First Object_________________________")
 
-        self.Obj1,self.Obj1_array = self.my_pipline.run(self.Obj1_url,self.pipline_variables)
+        self.Obj1,self.Obj1_array = self.my_pipline.run(self.Obj1_url,self.pipline_variables, folder_path)
+        
         print("_________________________Second Object_________________________")
 
-        self.Obj2,self.Obj2_array = self.my_pipline.run(self.Obj2_url,self.pipline_variables)
+        self.Obj2,self.Obj2_array = self.my_pipline.run(self.Obj2_url,self.pipline_variables, folder_path)
 
 
         R,T = self.init_R_T
@@ -363,8 +364,8 @@ class fragment_reassembler(object):
     """
     def __init__(self, obj1_url, obj2_url, init_R_T, processing_pipeline, pipeline_variables, \
                  registration_module, evaluation_list, show_results=False, save_results=False, dir_name=None):
-        if not os.path.exists("pipline_modules/"+pipeline+".py") :
-            print("Error !  cannot find "+pipline+" module in pipline_modules")
+        if not os.path.exists("pipline_modules/"+processing_pipeline+".py") :
+            print("Error !  cannot find "+processing_pipeline+" module in pipline_modules")
 
         if save_results:
             if not os.path.exists("results"):
@@ -384,7 +385,7 @@ class fragment_reassembler(object):
         self.obj2_url = obj2_url
         self.pipeline_variables = pipeline_variables
         self.init_R_T = init_R_T
-        self.pipeline_name = pipeline
+        self.pipeline_name = processing_pipeline
         self.registration_name = registration_module
         self.evaluation_list_names = evaluation_list
         self.processing_pipeline = importlib.import_module(str("pipline_modules."+processing_pipeline))
@@ -392,52 +393,82 @@ class fragment_reassembler(object):
         self.evaluation_list = [importlib.import_module(str("evaluation_modules."+my_eval)) for my_eval in evaluation_list]
         self.show_results = show_results
         self.save_results = save_results
+        self.obj1_name = obj1_url.split('/')[-1][:-4]
+        self.obj2_name = obj2_url.split('/')[-1][:-4]
+
+    def load_objects(self):
+        small = self.pipeline_variables[0]
+        large = self.pipeline_variables[1]
+        N = self.pipeline_variables[2]
+
+        print('Loading object 1:', self.obj1_url)
+        self.obj1 = self.processing_pipeline.load_obj(self.obj1_url, small, large, N)
+        print('Loading object 2:', self.obj2_url)
+        self.obj2 = self.processing_pipeline.load_obj(self.obj2_url, small, large, N)
+        print('done')   
+
+    def detect_breaking_curves(self):
+        if not self.obj1:
+            self.load_objects()
+        print('Detecting breaking curves for object 1..')
+        self.obj1_borders_indices, self.obj1_isolated_islands_pruned_graph = self.processing_pipeline.detect_breaking_curves(self.obj1, self.pipeline_variables)
+        print('Detecting breaking curves for object 2..')
+        self.obj2_borders_indices, self.obj2_isolated_islands_pruned_graph = self.processing_pipeline.detect_breaking_curves(self.obj2, self.pipeline_variables)
+        print('done')
+
+    def save_breaking_curves(self, folder_path):
+        print('Saving breaking curves for object 1..')
+        self.processing_pipeline.write_breaking_curves(self.obj1, self.obj1_borders_indices, folder_path, self.obj1_name)
+        print('Saving breaking curves for object 2..')
+        self.processing_pipeline.write_breaking_curves(self.obj2, self.obj2_borders_indices, folder_path, self.obj2_name)
+        print('done')
+
+    def segment_regions(self):
+        print('Segmenting object 1..')
+        self.obj1_seg_parts_array, seg_regions_indices, self.obj1_colored_regions = self.processing_pipeline.segment_regions(self.obj1, self.obj1_borders_indices, self.obj1_isolated_islands_pruned_graph)
+        print('Segmenting object 2..')
+        self.obj2_seg_parts_array, seg_regions_indices, self.obj2_colored_regions = self.processing_pipeline.segment_regions(self.obj2, self.obj2_borders_indices, self.obj2_isolated_islands_pruned_graph)
+        print('done')
+
+    def save_segmented_regions(self, folder_path):
+        print('Saving segmented parts for object 1..')
+        self.processing_pipeline.write_segmented_regions(self.obj1_seg_parts_array, self.obj1_colored_regions, folder_path, self.obj1_name)
+        print('Saving segmented parts for object 2..')
+        self.processing_pipeline.write_segmented_regions(self.obj2_seg_parts_array, self.obj2_colored_regions, folder_path, self.obj2_name)
+        print('done')
 
     def process_fragments(self):
         """Read and process fragments (breaking curve segmentation)"""
         print("_________________________First Object_________________________")
-        self.Obj1, self.Obj1_array = self.processing_pipeline.run(self.Obj1_url,self.pipeline_variables)
+        self.Obj1, self.Obj1_array = self.processing_pipeline.run(self.obj1_url,self.pipeline_variables)
         print("_________________________Second Object_________________________")
-        self.Obj2, self.Obj2_array = self.processing_pipeline.run(self.Obj2_url,self.pipeline_variables)
+        self.Obj2, self.Obj2_array = self.processing_pipeline.run(self.obj2_url,self.pipeline_variables)
 
     def set_fragments_in_place(self, T_1, T_2):
         """Move both objects"""
-        self.Obj1 = self.change_rotation_translation(self.Obj2,self.T_1)
-        self.Obj1_array = self.change_rotation_translation(self.Obj2_array,self.T_1)
-        self.Obj2 = self.change_rotation_translation(self.Obj2,self.T_2)
-        self.Obj2_array = self.change_rotation_translation(self.Obj2_array,self.T_2)
+        self.obj1 = self.apply_transformation(self.obj1, T_1)
+        if self.obj1_seg_parts_array:
+            self.obj1_seg_parts_array = self.apply_transformation(self.obj2_seg_parts_array, T_1)
+        self.obj2 = self.apply_transformation(self.obj2, T_2)
+        if self.obj2_seg_parts_array:
+            self.obj2_seg_parts_array = self.apply_transformation(self.obj2_seg_parts_array, T_2)
 
     def apply_transformation(self, objects, T):
-        if isinstance(Obj_arr, list):
-            for i in range(len(Obj_arr)):
+        if isinstance(objects, list):
+            for i in range(len(objects)):
                 objects = objects[i].pcd.transform(T)
-            return objects
         else:
             objects = objects.pcd.transform(T)
-            return objects
-
-    def change_rotation_translation(self,Obj_arr,init_R_T):
-        R,T = init_R_T
-        if isinstance(Obj_arr, list):
-            for i in range(len(Obj_arr)):
-                RM = Obj_arr[i].pcd.get_rotation_matrix_from_xyz((R[0], R[1], R[2]))
-                Obj_arr[i].pcd.rotate(RM, center=(0, 0, 0))
-                Obj_arr[i].pcd.translate((T[0], T[1], T[2]))
-            return Obj_arr
-        else:
-            RM = Obj_arr.pcd.get_rotation_matrix_from_xyz((R[0], R[1], R[2]))
-            Obj_arr.pcd.rotate(RM, center=(0, 0, 0))
-            Obj_arr.pcd.translate((T[0], T[1], T[2]))
-            return Obj_arr
+        return objects
 
     def show_fragments(self):
         """Just visualize the fragments"""
-        o3d.visualization.draw_geometries([self.Obj1, self.Obj2], 'Fragments')
+        o3d.visualization.draw_geometries([self.obj1, self.obj2], 'Fragments')
 
     def save_fragments(self, output_dir, pcl_name=''):
         """Save the fragments to ply files"""
-        o3d.io.write_point_cloud(os.path.join(output_dir, f'fragment1_{pcl_name}.ply'), self.Obj1)
-        o3d.io.write_point_cloud(os.path.join(output_dir, f'fragment2_{pcl_name}.ply'), self.Obj1)
+        o3d.io.write_point_cloud(os.path.join(output_dir, f'{pcl_name}_part1.ply'), self.obj1)
+        o3d.io.write_point_cloud(os.path.join(output_dir, f'{pcl_name}_part2.ply'), self.obj2)
 
     def set_gt_M(self, GT):
         """Manually set the ground truth matrix"""

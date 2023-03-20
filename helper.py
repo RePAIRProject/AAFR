@@ -51,7 +51,7 @@ def load_cloud(url,voxel_size=30000):
         raise("problem in reading the 3d file -> "+url)
 
     voxel_percentage = down_sample_to(pcd,voxel_size)
-    print("my number is -> ",voxel_percentage)
+    #print("my number is -> ",voxel_percentage)
     downpcd = pcd.voxel_down_sample(voxel_size=voxel_percentage)
     pcd_tree = o3d.geometry.KDTreeFlann(downpcd)
 
@@ -183,7 +183,7 @@ def create_graph(Obj, shortest_cycle_length, smallest_isolated_island_length,mas
                 q_points = np.asarray(tmp_pcd.points).take(idx,axis=0)
                 points_u.append(np.mean(np.abs(q_points[1:] - point)))
         radius = np.mean(points_u)
-    print("my radius is : ",radius)
+    #print("my radius is : ",radius)
     arr = []
     for idx in range_of_points:
         [k, points_q, _] = tree.search_radius_vector_3d(Obj.pcd.points[idx],radius)

@@ -77,23 +77,37 @@ def main():
     for exp_f in exp_folders: 
         print(exp_f)
     for exp_name in exp_folders:
-        if True:
+        if 'STATUE_30k' in exp_name:
             #if 'OTHER_DATASET_03_13_presious_tombstone_pair1' in exp_name:
             # if exp_name == 'cookies_large_08_06_fractured_52_NO':
             #exp_name = 'bottles_small_08_06_fractured_3_UPSIDEDOWN'
-            pdb.set_trace()
+            #pdb.set_trace()
+            #start_i = exp_name.index('STATUE') + 10
+            #pcl_name = exp_name[start_i:-6]
+            #pdb.set_trace()
             exp_folder = os.path.join(results_folder, exp_name)
             seg_parts_folder = os.path.join(exp_folder, 'segmented_parts')
-            obj1_f = os.path.join(seg_parts_folder, 'obj1')
+            objs_ff = os.listdir(os.path.join(exp_folder, 'segmented_parts'))
+            np.sort(objs_ff)
+            obj1_f = os.path.join(seg_parts_folder, objs_ff[0])
             obj1_parts = []
             for part in (os.listdir(obj1_f)):
                 pcd = o3d.io.read_point_cloud(os.path.join(obj1_f, part))
                 obj1_parts.append(pcd)
-            obj2_f = os.path.join(seg_parts_folder, 'obj2')
+            obj2_f = os.path.join(seg_parts_folder, objs_ff[1])
             obj2_parts = []
             for part in (os.listdir(obj2_f)):
                 pcd = o3d.io.read_point_cloud(os.path.join(obj2_f, part))
                 obj2_parts.append(pcd)
+
+            # full point clouds
+            full_frag1 = o3d.io.read_point_cloud(os.path.join(exp_folder, 'pointclouds', 'obj__part1.ply'))
+            full_frag2 = o3d.io.read_point_cloud(os.path.join(exp_folder, 'pointclouds', 'obj__part2.ply'))
+            full_frag1.paint_uniform_color([1, 1, 0])
+            full_frag2.paint_uniform_color([0, 0, 1])
+
+            # challenge transformation 
+            
 
             print(f'We have {len(obj1_parts)} parts of obj1 and {len(obj2_parts)} parts of obj2')
             
@@ -117,7 +131,7 @@ def main():
                     cur_frag2_size = len(pcd_part2.points)
                     frag1_size.append(cur_frag1_size)
                     frag2_size.append(cur_frag2_size)
-                    print(f'Now registerting part {o1} of obj1 ({cur_frag1_size} points) with part {o2} of obj2 ({cur_frag2_size} points)')
+                    print(f'Now registering part {o1} of obj1 ({cur_frag1_size} points) with part {o2} of obj2 ({cur_frag2_size} points)')
                     o1s.append(o1)
                     o2s.append(o2)
                     
@@ -133,7 +147,7 @@ def main():
                         transf_icp.append(np.eye(4))
                         chamfer_distances.append(MIN_PCD_SIZE)
 
-                    else:
+                    else:ORIGINAL
                         target = copy(pcd_part1)
                         source = copy(pcd_part2)
                         icp_sol, teaser_sol, num_corrs = register_fragments(source, target)
@@ -172,17 +186,13 @@ def main():
             candidates_registration.to_csv(os.path.join(exp_folder, 'candidates_registration.csv'))
             candidates_registration.sort_values('chamfer_distance').to_csv(os.path.join(exp_folder, 'candidates_registration_sorted.csv'))
             print(exp_folder)
-
-            full_frag1 = o3d.io.read_point_cloud(os.path.join(exp_folder, 'pointclouds', 'Obj1_before.ply'))
-            full_frag2 = o3d.io.read_point_cloud(os.path.join(exp_folder, 'pointclouds', 'Obj2_before.ply'))
-            full_frag1.paint_uniform_color([1, 1, 0])
-            full_frag2.paint_uniform_color([0, 0, 1])
+            
             if show_best_five and len(candidates_registration) > 5:
                 best_five = candidates_registration.sort_values('chamfer_distance').head(5)
                 pdb.set_trace()
                 for index, top_cand in best_five.iterrows():
                     f2_copy = copy(full_frag2)
-                    f2_copy.transform(top_cand['transf_icp'])
+                    #f2_copy.transform(top_cand['transf_icp'])
                     print(top_cand)
                     i1 = top_cand['o1s']
                     i2 = top_cand['o2s']

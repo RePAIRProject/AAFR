@@ -76,14 +76,14 @@ def main():
     MIN_PCD_SIZE = 1000
     challenge_rot_angles = [30, 30, 30]
     challenge_trans_matrix = [3, 5, 2]
-    results_folder = '/home/lucap/code/AAFR/segmentation_results_synth'
+    results_folder = '/home/lucap/code/AAFR/segmentation_results'
     exp_folders = os.listdir(results_folder)
     
     for exp_f in exp_folders: 
         print(exp_f)
     for exp_name in exp_folders:
-        if True:
-            #if 'OTHER_DATASET_03_13_presious_tombstone_pair1' in exp_name:
+        #if True:
+        if 'STATUE_30k' in exp_name:
             
             exp_folder = os.path.join(results_folder, exp_name)
             json_files = [filename for filename in os.listdir(exp_folder) if filename.endswith('.json')]

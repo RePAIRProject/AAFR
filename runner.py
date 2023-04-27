@@ -25,6 +25,7 @@ import datetime
 from copy import copy,deepcopy
 import pickle
 np.random.seed(seed=0)
+import json 
 
 class experiment(object):
     """docstring for ."""
@@ -405,7 +406,7 @@ class fragment_reassembler(object):
         self.obj1 = self.processing_pipeline.load_obj(self.obj1_url, small, large, N)
         print('Loading object 2:', self.obj2_url)
         self.obj2 = self.processing_pipeline.load_obj(self.obj2_url, small, large, N)
-        print('done')   
+        print('done') 
 
     def detect_breaking_curves(self):
         if not self.obj1:
@@ -467,8 +468,17 @@ class fragment_reassembler(object):
 
     def save_fragments(self, output_dir, pcl_name=''):
         """Save the fragments to ply files"""
-        o3d.io.write_point_cloud(os.path.join(output_dir, f'{pcl_name}_part1.ply'), self.obj1)
-        o3d.io.write_point_cloud(os.path.join(output_dir, f'{pcl_name}_part2.ply'), self.obj2)
+        os.makedirs(os.path.join(output_dir, 'pointclouds'), exist_ok=True)
+        o3d.io.write_point_cloud(os.path.join(output_dir, 'pointclouds', f'obj_{pcl_name}_part1.ply'), self.obj1.pcd)
+        o3d.io.write_point_cloud(os.path.join(output_dir, 'pointclouds', f'obj_{pcl_name}_part2.ply'), self.obj2.pcd)
+
+    def save_info(self, output_dir):
+        info = {
+            'name_o1': self.obj1_name,
+            'name_o2': self.obj2_name
+        }
+        with open(os.path.join(output_dir, 'info.json'), 'w') as ij:
+            json.dump(info, ij, indent=2) 
 
     def set_gt_M(self, GT):
         """Manually set the ground truth matrix"""

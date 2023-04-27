@@ -13,8 +13,8 @@ import pdb, json, os
 # from objects.other_datasets import objects
 # prefix_run = 'ODS_v2_03_15'
 
-from objects.repair_objects import objects
-prefix_run = 'RP_v2_03_15'
+from objects.statue import objects
+prefix_run = 'STATUE_30k'
 
 # from objects.objects_quick import objects
 # prefix_run = 'QUICK_TEST'
@@ -54,7 +54,7 @@ for object_number in range(len(objects)):
     thre = objects[object_number]["thre"]
 
     dilation_size = objects[object_number]["dilation_size"]
-    pdb.set_trace()
+    #pdb.set_trace()
     pipeline_variables = (small_object, large_object, N, Object_t1, Object_t2,
                         Object_t3, border_t1, border_t2, border_t3, dilation_size, thre)
 
@@ -68,6 +68,8 @@ for object_number in range(len(objects)):
     print_line_length = 65
     print('-' * print_line_length)
     fr_bbad.load_objects()
+    fr_bbad.save_fragments(output_dir)
+    fr_bbad.save_info(output_dir)
     print('-' * print_line_length)
     fr_bbad.detect_breaking_curves()
     fr_bbad.save_breaking_curves(output_dir)

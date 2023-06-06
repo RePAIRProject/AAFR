@@ -13,30 +13,38 @@ from itertools import count
 import helper
 # a global
 tiebreaker = count()
-
+np.random.seed(0)
 class FeatureLines(object):
     """docstring for ."""
 
-    def __init__(self, url, voxel_size=0.1):
-        self.pcd,self.pcd_tree = helper.load_cloud(url,voxel_size)
+    def __init__(self, url, type = "cloud",voxel_size=30000):
+        if type == "cloud":
+            self.pcd, self.pcd_tree = helper.load_cloud(url,voxel_size)
+        elif type == "mesh":
+            self.pcd, self.pcd_tree = helper.load_mesh(url,voxel_size)
+        else:
+            raise Exception('wrong value : '+type)
 
     def init(self,num_points):
 
         self.num_points = num_points
+        #print("starting calculating atts")
         self.points_q_idxs, self.points_q_points, self.points_u, self.points_c, \
         self.points_eig_vecs, self.points_eig_vals, self.k_points,  = self.cal_all_points_main_atts(self.pcd,self.pcd_tree,num_points = self.num_points)
-
-
-        self.w_cr_v = self.cal_crease_penalty_vector(self.points_eig_vals,self.points_eig_vecs)
+        # 
+        # self.average_distance = np.linalg.norm(self.pcd.points  - np.mean(self.pcd.points,axis=0))
+        #
+        # print("starting calculating w_co")
+        # self.w_cr_v = self.cal_crease_penalty_vector(self.points_eig_vals,self.points_eig_vecs)
         self.w_co = self.cal_corner_penalty(self.points_eig_vals,self.points_eig_vecs)
-        self.e_vectors_mag, self.e_vectors_dir = self.cal_p_q_vectors(self.pcd.points,self.points_q_points)
-
-        #problem
-        self.w_k = self.cal_curvature_estimate(self.pcd.points,self.points_eig_vals,self.points_eig_vecs,self.points_c,self.points_u)
-
-        #works
-        self.w_b2 = self.cal_max_angle()
-        self.w_b1 = self.cal_border_penalty_vector(self.points_eig_vals,self.points_eig_vecs)
+        # self.e_vectors_mag, self.e_vectors_dir = self.cal_p_q_vectors(self.pcd.points,self.points_q_points)
+        #
+        # #problem
+        # self.w_k = self.cal_curvature_estimate(self.pcd.points,self.points_eig_vals,self.points_eig_vecs,self.points_c,self.points_u)
+        #
+        # #works
+        # self.w_b2 = self.cal_max_angle()
+        # self.w_b1 = self.cal_border_penalty_vector(self.points_eig_vals,self.points_eig_vecs)
 
     def NormalizeData(self,data):
         return (data - np.min(data)) / (np.max(data) - np.min(data))
@@ -59,7 +67,7 @@ class FeatureLines(object):
         points_eig_vals = []
         points_k = []
         centroid = self.pcd.get_center()
-        for i in range(len(pcd.points)):
+        for i in tqdm(range(len(pcd.points))):
             point = pcd.points[i]
             [k, idx, _] = pcd_tree.search_knn_vector_3d(point, num_points)
 
@@ -150,7 +158,7 @@ class FeatureLines(object):
     # W_co
     def cal_corner_penalty(self,points_eig_vals,points_eig_vecs):
         points_eig_vals = np.asarray(points_eig_vals)
-        w_points_corner = (points_eig_vals[:,2]-points_eig_vals[:,0])/points_eig_vals[:,2]
+        w_points_corner = (10*points_eig_vals[:,2]-points_eig_vals[:,0])/points_eig_vals[:,2]
         w_points_corner = self.NormalizeData(w_points_corner)
         return w_points_corner
 
@@ -194,46 +202,26 @@ class FeatureLines(object):
         w_b_vertex_penalty = term1+term2
         return np.nan_to_num(w_b), np.nan_to_num(w_b_vertex_penalty)
 
-    def array_to_graph(self):
-        Graph = nx.Graph()
-        edges = []
+    def array_to_graph(self,type):
+        try :
+            Graph = self.my_graph
+        except :
+            Graph = nx.Graph()
         for p in range(len(self.pcd.points)):
             for q_ind,q in enumerate(self.points_q_idxs[p][1:]):
                 Graph.add_edge(int(p),int(q))
-                Graph[int(p)][int(q)]["crease_penalty"] = self.w_c[int(p)][int(q_ind)]
-                Graph[int(p)][int(q)]["border_penalty"] = self.w_b[int(p)][int(q_ind)]
-                Graph[int(p)][int(q)]["border_vertex_penalty"] = self.w_b_vertex_penalty[int(p)][int(q_ind)]
-                Graph[int(p)][int(q)]["crease_vertex_penalty"] = self.w_c_vertex_penalty[int(p)][int(q_ind)]
+                if type == "crease" or type=="all":
+                    Graph[int(p)][int(q)]["crease_penalty"] = self.w_c[int(p)][int(q_ind)]
+                    Graph[int(p)][int(q)]["crease_vertex_penalty"] = self.w_c_vertex_penalty[int(p)][int(q_ind)]
+                if type == "border" or type=="all":
+                    Graph[int(p)][int(q)]["border_penalty"] = self.w_b[int(p)][int(q_ind)]
+                    Graph[int(p)][int(q)]["border_vertex_penalty"] = self.w_b_vertex_penalty[int(p)][int(q_ind)]
+
             Graph.nodes[int(p)]["w_cr_v"] = (1-self.NormalizeData(np.sqrt(np.sum(self.w_cr_v * self.w_cr_v ,axis=1))))[p]
             Graph.nodes[int(p)]["w_co"] = self.w_co[p]
             Graph.nodes[int(p)]["w_b1"] = (1-self.NormalizeData(np.sqrt(np.sum(self.w_b1 * self.w_b1 ,axis=1))))[p]
             Graph.nodes[int(p)]["w_b2"] = self.w_b2[p]
         return Graph
-
-    def path_length(self,G,p,q,threshold):
-        counter = 0
-        short_branches = []
-        stack = [[p]]
-        visited = set()
-        while stack:
-            counter+=1
-            # if counter >= threshold:
-            #     break
-            curr_branch = stack.pop(0)
-            curr_p  = curr_branch[-1]
-            neighbors = list(G.neighbors(curr_p))
-    #         print(len(neighbors),"->",neighbors)
-            if len(neighbors) == 1 and neighbors[0] in visited:
-                short_branches.append(curr_branch[2:])
-                continue
-            for n in neighbors:
-                if n == q:
-                    return counter+1
-                if n not in visited:
-                    visited.add(n)
-                    stack.append(curr_branch+[n])
-
-            return counter+1
 
     def save(self,path=""):
         nx.write_gpickle(self.my_graph,path+"my_network.gpickle")
@@ -245,9 +233,8 @@ class FeatureLines(object):
     def init_graph(self,alpha=0.2,gamma=0.5):
         self.w_c, self.w_c_vertex_penalty = self.weight_crease_penalty(alpha=alpha)
         self.w_b, self.w_b_vertex_penalty = self.weight_border_penalty(gamma=gamma)
-        self.my_graph = self.array_to_graph()
-    def __create_graph(self,pattern="crease",T=0.9,pattern_length_T=2):
-            pattern_length_T = np.sqrt(len(self.pcd.points))//pattern_length_T
+        self.my_graph = self.array_to_graph(type="all")
+    def __create_graph(self,T ,minimum_allowed_branch_length,minimum_allowed_island_size, pattern="crease"):
             ds_queue = DisjointSetExtra()
             nodes = set()
             edges = []
@@ -268,7 +255,7 @@ class FeatureLines(object):
                     if not ds.connected(edge[0],edge[1]):
                         ds.connect(edge[0],edge[1])
                         tmp_Graph.add_edge(edge[0],edge[1])
-                    elif helper.path_length(tmp_Graph,edge[0],edge[1],pattern_length_T)>pattern_length_T//2:
+                    elif helper.path_length(tmp_Graph,edge[0],edge[1])>minimum_allowed_branch_length:
                         ds.add(edge[0],edge[1])
                         tmp_Graph.add_edge(edge[0],edge[1])
                 else:
@@ -277,73 +264,45 @@ class FeatureLines(object):
 
             F_lines = []
             for group in list(ds.ds.itersets()):
-                if len(group) < pattern_length_T//2:
+                if len(group) < minimum_allowed_island_size:
                     continue
                 F_lines.append(group)
             return F_lines,tmp_Graph
-    def __create_crease_graph(self, T=0.9,pattern_length_T=2):
-        return self.__create_graph("crease",T,pattern_length_T)
-    def __create_border_graph(self, T=0.9,pattern_length_T=2):
-        return self.__create_graph("border",T,pattern_length_T)
+
+
 
     #prunning the graph
-    def create_crease(self,T=0.9,pattern_length_T=2):
-            self.crease_pattern,self.tmp_graph = self.__create_crease_graph(T,pattern_length_T)
-            nodes = {}
-            for branch in self.crease_pattern:
-                for point in branch:
-                    neighbors = set(self.tmp_graph.neighbors(point))
-                    if len(list(neighbors)) >= 2:
-                        nodes[point]=neighbors
+    def create_crease(self,T ,minimum_allowed_branch_length,minimum_allowed_island_size):
+            minimum_allowed_branch_length = np.sqrt(np.asarray(self.pcd.points).shape[0])//minimum_allowed_branch_length
+            minimum_allowed_island_size = np.sqrt(np.asarray(self.pcd.points).shape[0])//minimum_allowed_island_size
+            self.crease_pattern,self.tmp_graph = self.__create_graph(T,minimum_allowed_branch_length,minimum_allowed_island_size,"crease")
+            pruned_graph, self.crease_pruned_points, self.crease_pattern_pruned = helper.prune_branches\
+            (self.crease_pattern,self.tmp_graph, minimum_allowed_branch_length)
 
-            T = np.sqrt(np.asarray(self.pcd.points).shape[0])//2
-            all_nodes_rem = []
-            visited = set()
-            for point,my_nodes in nodes.items():
-                score = 0
-                tmp_rem_nodes = []
-                for node in my_nodes:
-                    if not helper.short_branch(self.tmp_graph,node,{point},T):
-                        score+=1
-                    else:
-                        tmp_rem_nodes.append(node)
 
-                if score >= 2:
-                    for node in tmp_rem_nodes:
-                        tmp_rem_nodes = helper.remove_point(self.tmp_graph,node,{point})
-                        all_nodes_rem.extend(tmp_rem_nodes)
-            self.crease_pruned_points = {node for branch in all_nodes_rem for node in branch}
-            self.crease_pattern_pruned = [[node for node in group-self.crease_pruned_points] for group in self.crease_pattern]
-            # print(len(self.crease_pruned_points)/len(list(self.pcd.points)))
-    def create_border(self,T=0.9,pattern_length_T=2):
-        self.border_pattern,self.tmp_graph = self.__create_border_graph(T,pattern_length_T)
-        nodes = {}
-        for branch in self.border_pattern:
-            for point in branch:
-                neighbors = set(self.tmp_graph.neighbors(point))
-                if len(list(neighbors)) >= 2:
-                    nodes[point]=neighbors
+    def init_create_crease(self, alpha , T ,minimum_allowed_branch_length , minimum_allowed_island_size):
+        self.w_c, self.w_c_vertex_penalty = self.weight_crease_penalty(alpha)
+        self.my_graph = self.array_to_graph(type="crease")
+        self.create_crease(T,minimum_allowed_branch_length , minimum_allowed_island_size)
 
-        T = np.sqrt(np.asarray(self.pcd.points).shape[0])//2
-        all_nodes_rem = []
-        visited = set()
-        for point,my_nodes in nodes.items():
-            score = 0
-            tmp_rem_nodes = []
-            for node in my_nodes:
-                if not helper.short_branch(self.tmp_graph,node,{point},T):
-                    score+=1
-                else:
-                    tmp_rem_nodes.append(node)
 
-            if score >= 2:
-                for node in tmp_rem_nodes:
-                    tmp_rem_nodes = helper.remove_point(self.tmp_graph,node,{point})
-                    all_nodes_rem.extend(tmp_rem_nodes)
+    def create_border(self, T, minimum_allowed_branch_length , minimum_allowed_island_size):
+        minimum_allowed_branch_length = np.sqrt(np.asarray(self.pcd.points).shape[0])//minimum_allowed_branch_length
+        minimum_allowed_island_size = np.sqrt(np.asarray(self.pcd.points).shape[0])//minimum_allowed_island_size
+        self.border_pattern,self.tmp_graph = self.__create_graph(T,minimum_allowed_branch_length,minimum_allowed_island_size,"border")
+        pruned_graph, self.border_pruned_points, self.border_pattern_pruned = helper.prune_branches\
+            (self.border_pattern,self.tmp_graph, minimum_allowed_branch_length)
 
-        self.border_pruned_points = {node for branch in all_nodes_rem for node in branch}
-        self.border_pattern_pruned = [[node for node in group-self.border_pruned_points] for group in self.border_pattern]
         # print(len(self.border_pruned_points)/len(list(self.pcd.points)))
+    def init_create_border(self, gamma, T , minimum_allowed_branch_length , minimum_allowed_island_size):
+        minimum_allowed_branch_length = np.sqrt(np.asarray(self.pcd.points).shape[0])//minimum_allowed_branch_length
+        minimum_allowed_island_size = np.sqrt(np.asarray(self.pcd.points).shape[0])//minimum_allowed_island_size
+        self.w_b, self.w_b_vertex_penalty = self.weight_border_penalty(gamma)
+        self.my_graph = self.array_to_graph(type="border")
+        self.create_border(T, minimum_allowed_branch_length , minimum_allowed_island_size)
+
+
+
     def show_heat(self,weights,thre = 0):
         if len(weights.shape)>weights.shape[-1] > 1:
             weights = 1-self.NormalizeData(np.sqrt(np.sum(weights * weights,axis=1)))
@@ -352,7 +311,7 @@ class FeatureLines(object):
         cmap = matplotlib.cm.get_cmap('viridis')
         rgba = cmap(weights)
         rgb = rgba[:,:3]
-        self.pcd.colors = o3d.utility.Vector3dVector(np.asarray(rgb).astype(np.float))
+        self.pcd.colors = o3d.utility.Vector3dVector(np.asarray(rgb).astype("float"))
         o3d.visualization.draw_geometries([self.pcd])
     def show_pattern(self,pattern):
             groups = pattern
@@ -361,5 +320,5 @@ class FeatureLines(object):
                 color = (random.randrange(0, 255),0,random.randrange(0, 255))
                 for nodes in group:
                     colors[nodes] = color
-            self.pcd.colors = o3d.utility.Vector3dVector(np.asarray(colors).astype(np.float) / 255.0)
+            self.pcd.colors = o3d.utility.Vector3dVector(np.asarray(colors).astype("float") / 255.0)
             o3d.visualization.draw_geometries([self.pcd])

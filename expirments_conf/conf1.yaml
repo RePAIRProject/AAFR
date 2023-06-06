@@ -1,29 +1,30 @@
 seed : 100
 
 #dataset folder
-data : "data_test"
+data : "data_test/trial_1"
 
 rotation :
   x : 0
-  y : 1.14
-  z : 0.6
+  y : 0
+  z : 0
 
 translation :
   x : 0
-  y : 10
-  z : 15
+  y : 0
+  z : 0
 
 piplines :
   - name : "pipline_1"
     para1: 15
-    para2: random(1,100,3)
-    para3: array([1,10,3])
-    para4: range(1,10,3)
-    para4: range(1,10,3)
+    para2: 2
+    para3: 2
+    para4: 2
+    para5: 0.95
 
 tests :
   - name : "ICP_test"
 
 evaluation :
   - rms
-  - new_eval
+
+save_results: True

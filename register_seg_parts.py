@@ -107,7 +107,7 @@ def main():
             full_frag2.paint_uniform_color([0, 0, 1])
 
             # challenge transformation 
-            
+            challenge_RT = ((0.2, 0.2, 0.1), (-0.5, -0.5, -0.5))
 
             print(f'We have {len(obj1_parts)} parts of obj1 and {len(obj2_parts)} parts of obj2')
             

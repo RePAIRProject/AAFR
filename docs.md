@@ -25,4 +25,4 @@ They are separated files that contains url and parameters for objects, separated
 The other scripts may be helpful for debugging:
 - `register_seg_parts` is actually a subset of `challenge_assembly` without the transformation (so it register them in place)
 - `register_with_icp` uses ICP without any pre-processing, useful for baseline
-- `show_something` (pipeline, segmentation, assembly) is some code for visualizing results (to produce images for the paper)
+- `show_something` (where `something` can be `pipeline`, `segmentation`, `assembly`) are some scripts for visualizing results (to produce images for the paper)

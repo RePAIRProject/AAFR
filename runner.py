@@ -26,6 +26,7 @@ from copy import copy,deepcopy
 import pickle
 np.random.seed(seed=0)
 import json 
+import pdb 
 
 class experiment(object):
     """docstring for ."""
@@ -363,39 +364,30 @@ class fragment_reassembler(object):
     to debug and understand the codebase better and for further extension/modification
     of the pipeline components 
     """
-    def __init__(self, obj1_url, obj2_url, init_R_T, processing_pipeline, pipeline_variables, \
-                 registration_module, evaluation_list, show_results=False, save_results=False, dir_name=None):
-        if not os.path.exists("pipline_modules/"+processing_pipeline+".py") :
-            print("Error !  cannot find "+processing_pipeline+" module in pipline_modules")
+    def __init__(self, broken_objects, parameters, name='broken_objects', show_results=False, save_results=False, dir_name=None):
+        
+        if not os.path.exists("pipline_modules/"+parameters['processing_module']+".py") :
+            print("Error !  cannot find "+parameters['processing_module']+" module in pipline_modules")
 
         if save_results:
             if not os.path.exists("results"):
                 os.mkdir("results")
-            # date = datetime.datetime.now()
-            # timestamp_str = date.strftime("%d-%b-%Y__%H_%M_%S_%f")
-            # if not dir_name:
-            #     dir_timestamp = "test_" + timestamp_str
-            #     path = os.path.join("results", dir_timestamp)
-            # else:
-            #     path = os.path.join("results",dir_name)
             self.results_path = "results"
-            # if not os.path.exists(path):
-            #     os.mkdir(path)
-        self.pair_name = obj1_url.split('/')[-2]
-        self.obj1_url = obj1_url
-        self.obj2_url = obj2_url
-        self.pipeline_variables = pipeline_variables
-        self.init_R_T = init_R_T
-        self.pipeline_name = processing_pipeline
-        self.registration_name = registration_module
-        self.evaluation_list_names = evaluation_list
-        self.processing_pipeline = importlib.import_module(str("pipline_modules."+processing_pipeline))
-        self.registration = importlib.import_module(str("test_modules."+registration_module))
-        self.evaluation_list = [importlib.import_module(str("evaluation_modules."+my_eval)) for my_eval in evaluation_list]
+        self.pair_name = parameters
+        self.obj1_url = broken_objects['path_obj1']
+        self.obj2_url = broken_objects['path_obj2']
+        self.pipeline_variables = broken_objects['variables_as_list']
+        self.init_R_T = parameters['init_R_T']
+        self.pipeline_name = parameters['processing_module']
+        self.registration_name = parameters['registration_module']
+        self.evaluation_list_names = parameters['evaluation_metrics']
+        self.processing_pipeline = importlib.import_module(str("pipline_modules."+self.pipeline_name))
+        self.registration = importlib.import_module(str("test_modules."+self.registration_name))
+        self.evaluation_list = [importlib.import_module(str("evaluation_modules."+my_eval)) for my_eval in self.evaluation_list_names]
         self.show_results = show_results
         self.save_results = save_results
-        self.obj1_name = obj1_url.split('/')[-1][:-4]
-        self.obj2_name = obj2_url.split('/')[-1][:-4]
+        self.obj1_name = self.obj1_url.split('/')[-1][:-4]
+        self.obj2_name = self.obj2_url.split('/')[-1][:-4]
 
     def load_objects(self):
         small = self.pipeline_variables[0]
@@ -408,6 +400,9 @@ class fragment_reassembler(object):
         self.obj2 = self.processing_pipeline.load_obj(self.obj2_url, small, large, N)
         print('done') 
 
+    def set_output_dir(self, output_dir):
+        self.output_dir = output_dir
+        
     def detect_breaking_curves(self):
         if not self.obj1:
             self.load_objects()
@@ -417,25 +412,27 @@ class fragment_reassembler(object):
         self.obj2_borders_indices, self.obj2_isolated_islands_pruned_graph = self.processing_pipeline.detect_breaking_curves(self.obj2, self.pipeline_variables)
         print('done')
 
-    def save_breaking_curves(self, folder_path):
+    def save_breaking_curves(self):
         print('Saving breaking curves for object 1..')
-        self.processing_pipeline.write_breaking_curves(self.obj1, self.obj1_borders_indices, folder_path, self.obj1_name)
+        self.processing_pipeline.write_breaking_curves(self.obj1, self.obj1_borders_indices, self.output_dir, self.obj1_name)
         print('Saving breaking curves for object 2..')
-        self.processing_pipeline.write_breaking_curves(self.obj2, self.obj2_borders_indices, folder_path, self.obj2_name)
+        self.processing_pipeline.write_breaking_curves(self.obj2, self.obj2_borders_indices, self.output_dir, self.obj2_name)
         print('done')
 
     def segment_regions(self):
-        print('Segmenting object 1..')
+        print("The segmentation process is very slow at the moment: it visits all nodes in a queue to assign them to a region")
+        print("The code is in the processing module in the get_sides method: feel free to help improving it (:")
+        print('Segmenting object 1.. ')
         self.obj1_seg_parts_array, seg_regions_indices, self.obj1_colored_regions = self.processing_pipeline.segment_regions(self.obj1, self.obj1_borders_indices, self.obj1_isolated_islands_pruned_graph)
-        print('Segmenting object 2..')
+        print('Segmenting object 2.. ')
         self.obj2_seg_parts_array, seg_regions_indices, self.obj2_colored_regions = self.processing_pipeline.segment_regions(self.obj2, self.obj2_borders_indices, self.obj2_isolated_islands_pruned_graph)
         print('done')
 
-    def save_segmented_regions(self, folder_path):
+    def save_segmented_regions(self):
         print('Saving segmented parts for object 1..')
-        self.processing_pipeline.write_segmented_regions(self.obj1_seg_parts_array, self.obj1_colored_regions, folder_path, self.obj1_name)
+        self.processing_pipeline.write_segmented_regions(self.obj1_seg_parts_array, self.obj1_colored_regions, self.output_dir, self.obj1_name)
         print('Saving segmented parts for object 2..')
-        self.processing_pipeline.write_segmented_regions(self.obj2_seg_parts_array, self.obj2_colored_regions, folder_path, self.obj2_name)
+        self.processing_pipeline.write_segmented_regions(self.obj2_seg_parts_array, self.obj2_colored_regions, self.output_dir, self.obj2_name)
         print('done')
 
     def process_fragments(self):
@@ -466,18 +463,18 @@ class fragment_reassembler(object):
         """Just visualize the fragments"""
         o3d.visualization.draw_geometries([self.obj1, self.obj2], 'Fragments')
 
-    def save_fragments(self, output_dir, pcl_name=''):
+    def save_fragments(self, pcl_name=''):
         """Save the fragments to ply files"""
-        os.makedirs(os.path.join(output_dir, 'pointclouds'), exist_ok=True)
-        o3d.io.write_point_cloud(os.path.join(output_dir, 'pointclouds', f'obj_{pcl_name}_part1.ply'), self.obj1.pcd)
-        o3d.io.write_point_cloud(os.path.join(output_dir, 'pointclouds', f'obj_{pcl_name}_part2.ply'), self.obj2.pcd)
+        os.makedirs(os.path.join(self.output_dir, 'pointclouds'), exist_ok=True)
+        o3d.io.write_point_cloud(os.path.join(self.output_dir, 'pointclouds', f'obj_{pcl_name}_part1.ply'), self.obj1.pcd)
+        o3d.io.write_point_cloud(os.path.join(self.output_dir, 'pointclouds', f'obj_{pcl_name}_part2.ply'), self.obj2.pcd)
 
-    def save_info(self, output_dir):
+    def save_info(self):
         info = {
             'name_o1': self.obj1_name,
             'name_o2': self.obj2_name
         }
-        with open(os.path.join(output_dir, 'info.json'), 'w') as ij:
+        with open(os.path.join(self.output_dir, 'info.json'), 'w') as ij:
             json.dump(info, ij, indent=2) 
 
     def set_gt_M(self, GT):

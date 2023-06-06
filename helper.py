@@ -205,7 +205,7 @@ def create_graph(Obj, shortest_cycle_length, smallest_isolated_island_length,mas
             else:
                 ds.add(q,int(idx))
                 Graph.add_edge(q,int(idx))
-    print(len(arr))
+    print(f"The graph has {len(arr)} nodes..")
     F_lines = []
     isolated_islands = []
     for group in list(ds.ds.itersets()):

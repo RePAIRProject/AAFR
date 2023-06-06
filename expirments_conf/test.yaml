@@ -1,7 +1,7 @@
 seed : 100
 
 #dataset folder
-data : "data_test/test"
+data : "data_test/pairwise/repair_group8_pair2"
 
 rotation :
   x : 0
@@ -19,7 +19,7 @@ piplines :
     para2: 2
     para3: 2
     para4: 2
-    para5: 0.92
+    para5: 0.98
 
 tests :
   - name : "ICP_test"

@@ -10,11 +10,14 @@ import random
 import matplotlib
 from collections import Counter
 from itertools import count
-
-
+from copy import copy, deepcopy
+random.seed(0)
+np.random.seed(0)
 def down_sample_to(obj,num):
     if len(obj.points) < num:
-        raise Exception("Sorry, num should be less than number of voxels in the objects")
+        print("num should be less than number of voxels in the objects, no down sampling will happen !")
+        num = len(obj.points)
+        print(num)
     diff = 0
     answer = None
     g_counter = 0
@@ -42,12 +45,31 @@ def down_sample_to(obj,num):
     return answer
 
 def load_cloud(url,voxel_size=30000):
-      pcd = o3d.io.read_point_cloud(url)
-      voxel_percentage = down_sample_to(pcd,voxel_size)
-      downpcd = pcd.voxel_down_sample(voxel_size=voxel_percentage)
-      pcd_tree = o3d.geometry.KDTreeFlann(downpcd)
-      return downpcd,pcd_tree
+    try:
+        pcd = o3d.io.read_point_cloud(url)
+    except:
+        raise("problem in reading the 3d file -> "+url)
 
+    voxel_percentage = down_sample_to(pcd,voxel_size)
+    #print("my number is -> ",voxel_percentage)
+    downpcd = pcd.voxel_down_sample(voxel_size=voxel_percentage)
+    pcd_tree = o3d.geometry.KDTreeFlann(downpcd)
+
+    return downpcd,pcd_tree
+
+def load_mesh(url,voxel_size=30000):
+    try:
+        mesh = o3d.io.read_triangle_mesh(url)
+        pcd = mesh.sample_points_uniformly(number_of_points=voxel_size)
+    except:
+        raise("problem in reading the 3d file -> "+url)
+
+    # voxel_percentage = down_sample_to(pcd,voxel_size)
+    # print("my number is -> ",voxel_percentage)
+    # downpcd = pcd.voxel_down_sample(voxel_size=voxel_percentage)
+    pcd_tree = o3d.geometry.KDTreeFlann(pcd)
+
+    return pcd,pcd_tree
 def remove_point(G,p,visited):
     counter = 0
     short_branches = []
@@ -111,7 +133,7 @@ def prune_branches(F_lines,Graph,shortest_allowed_branch_length):
     for branch in F_lines:
         for point in branch:
             neighbors = set(Graph.neighbors(point))
-            if len(list(neighbors)) >= 2:
+            if len(list(neighbors)) > 2:
                 nodes[point]=neighbors
 
     T = shortest_allowed_branch_length
@@ -131,28 +153,44 @@ def prune_branches(F_lines,Graph,shortest_allowed_branch_length):
                 tmp_rem_nodes = remove_point(Graph,node,{point})
                 all_nodes_rem.extend(tmp_rem_nodes)
     removed_nodes = {node for branch in all_nodes_rem for node in branch}
-    pruned_graph = Graph
-    pruned_graph.remove_nodes_from(list(removed_nodes))
-    valid_nodes = [[node for node in group-removed_nodes] for group in F_lines]
-    return pruned_graph, removed_nodes, valid_nodes
+    Graph.remove_nodes_from(list(removed_nodes))
+    valid_nodes = []
+    for group in F_lines:
+        new_group = []
+        for node in group:
+            if node not in removed_nodes:
+                new_group.append(node)
+        valid_nodes.append(new_group)
+    return  Graph, removed_nodes, valid_nodes
 #Create the Graph
-def create_graph(Obj, radius, shortest_cycle_length, smallest_isolated_island_length):
+def create_graph(Obj, shortest_cycle_length, smallest_isolated_island_length,mask = None,radius=None):
     ds = DisjointSetExtra()
     Graph = nx.Graph()
     tree = o3d.geometry.KDTreeFlann(Obj.pcd)
-
-    pcd_tree = o3d.geometry.KDTreeFlann(Obj.pcd)
     points_u = []
-    for i in range(len(Obj.pcd.points)):
-            point = Obj.pcd.points[i]
-            [k, idx, _] = pcd_tree.search_knn_vector_3d(point, 100)
-            q_points = np.asarray(Obj.pcd.points).take(idx,axis=0)
-            points_u.append(np.mean(np.abs(q_points[1:] - point)))
-    radius = np.mean(points_u)
-    print("my radius is : ",radius)
-    for idx,p in enumerate(tqdm(Obj.pcd.points)):
+
+    range_of_points = range(len(Obj.pcd.points))
+    tmp_tree = o3d.geometry.KDTreeFlann(Obj.pcd)
+    tmp_pcd = copy(Obj.pcd)
+    if mask:
+        range_of_points = mask
+        tmp_pcd.points = o3d.utility.Vector3dVector(np.asarray(tmp_pcd.points)[mask])
+        tmp_tree = o3d.geometry.KDTreeFlann(tmp_pcd)
+    if not radius:
+        for i in range_of_points:
+                point = Obj.pcd.points[i]
+                [k, idx, _] = tmp_tree.search_knn_vector_3d(point, 100)
+                q_points = np.asarray(tmp_pcd.points).take(idx,axis=0)
+                points_u.append(np.mean(np.abs(q_points[1:] - point)))
+        radius = np.mean(points_u)
+    #print("my radius is : ",radius)
+    arr = []
+    for idx in range_of_points:
         [k, points_q, _] = tree.search_radius_vector_3d(Obj.pcd.points[idx],radius)
-        distance = np.abs(np.linalg.norm(p-np.asarray(Obj.pcd.points).take(points_q,axis=0),axis=1))
+        if mask:
+            points_q = [i for i in points_q if i in mask]
+        arr.extend(points_q)
+        distance = np.abs(np.linalg.norm(Obj.pcd.points[idx]-np.asarray(Obj.pcd.points).take(points_q,axis=0),axis=1))
         arr1inds = distance.argsort()
         points_q_sorted = np.asarray(points_q)[arr1inds]
         for q in points_q_sorted:
@@ -167,7 +205,7 @@ def create_graph(Obj, radius, shortest_cycle_length, smallest_isolated_island_le
             else:
                 ds.add(q,int(idx))
                 Graph.add_edge(q,int(idx))
-
+    print(len(arr))
     F_lines = []
     isolated_islands = []
     for group in list(ds.ds.itersets()):
@@ -176,6 +214,17 @@ def create_graph(Obj, radius, shortest_cycle_length, smallest_isolated_island_le
         else:
             F_lines.append(group)
 
-    Graph.remove_nodes_from(isolated_islands)
+    isolated_islands_graph = deepcopy(Graph)
+    isolated_islands_graph.remove_nodes_from(isolated_islands)
 
-    return Graph, F_lines, isolated_islands
+    return isolated_islands_graph, F_lines, isolated_islands
+
+
+def decompose(TRS):
+    T = TRS[:3,3]
+    S = np.eye(3)
+    S[0, 0],S[1, 1],S[2, 2] = np.linalg.norm(TRS[:3,0]),np.linalg.norm(TRS[:3,1]),np.linalg.norm(TRS[:3,2])
+    RS = TRS[0:3,0:3]
+    S_inv = np.linalg.inv(S)
+    R = np.matmul(RS,S_inv)
+    return R,T

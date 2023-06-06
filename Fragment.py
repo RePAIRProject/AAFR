@@ -13,32 +13,38 @@ from itertools import count
 import helper
 # a global
 tiebreaker = count()
-
+np.random.seed(0)
 class FeatureLines(object):
     """docstring for ."""
 
-    def __init__(self, url, voxel_size=30000):
-        self.pcd,self.pcd_tree = helper.load_cloud(url,voxel_size)
+    def __init__(self, url, type = "cloud",voxel_size=30000):
+        if type == "cloud":
+            self.pcd, self.pcd_tree = helper.load_cloud(url,voxel_size)
+        elif type == "mesh":
+            self.pcd, self.pcd_tree = helper.load_mesh(url,voxel_size)
+        else:
+            raise Exception('wrong value : '+type)
 
     def init(self,num_points):
 
         self.num_points = num_points
+        #print("starting calculating atts")
         self.points_q_idxs, self.points_q_points, self.points_u, self.points_c, \
         self.points_eig_vecs, self.points_eig_vals, self.k_points,  = self.cal_all_points_main_atts(self.pcd,self.pcd_tree,num_points = self.num_points)
-
-        self.average_distance = np.linalg.norm(self.pcd.points  - np.mean(self.pcd.points,axis=0))
-
-
-        self.w_cr_v = self.cal_crease_penalty_vector(self.points_eig_vals,self.points_eig_vecs)
+        # 
+        # self.average_distance = np.linalg.norm(self.pcd.points  - np.mean(self.pcd.points,axis=0))
+        #
+        # print("starting calculating w_co")
+        # self.w_cr_v = self.cal_crease_penalty_vector(self.points_eig_vals,self.points_eig_vecs)
         self.w_co = self.cal_corner_penalty(self.points_eig_vals,self.points_eig_vecs)
-        self.e_vectors_mag, self.e_vectors_dir = self.cal_p_q_vectors(self.pcd.points,self.points_q_points)
-
-        #problem
-        self.w_k = self.cal_curvature_estimate(self.pcd.points,self.points_eig_vals,self.points_eig_vecs,self.points_c,self.points_u)
-
-        #works
-        self.w_b2 = self.cal_max_angle()
-        self.w_b1 = self.cal_border_penalty_vector(self.points_eig_vals,self.points_eig_vecs)
+        # self.e_vectors_mag, self.e_vectors_dir = self.cal_p_q_vectors(self.pcd.points,self.points_q_points)
+        #
+        # #problem
+        # self.w_k = self.cal_curvature_estimate(self.pcd.points,self.points_eig_vals,self.points_eig_vecs,self.points_c,self.points_u)
+        #
+        # #works
+        # self.w_b2 = self.cal_max_angle()
+        # self.w_b1 = self.cal_border_penalty_vector(self.points_eig_vals,self.points_eig_vecs)
 
     def NormalizeData(self,data):
         return (data - np.min(data)) / (np.max(data) - np.min(data))
@@ -61,7 +67,7 @@ class FeatureLines(object):
         points_eig_vals = []
         points_k = []
         centroid = self.pcd.get_center()
-        for i in range(len(pcd.points)):
+        for i in tqdm(range(len(pcd.points))):
             point = pcd.points[i]
             [k, idx, _] = pcd_tree.search_knn_vector_3d(point, num_points)
 
@@ -152,7 +158,7 @@ class FeatureLines(object):
     # W_co
     def cal_corner_penalty(self,points_eig_vals,points_eig_vecs):
         points_eig_vals = np.asarray(points_eig_vals)
-        w_points_corner = (points_eig_vals[:,2]-points_eig_vals[:,0])/points_eig_vals[:,2]
+        w_points_corner = (10*points_eig_vals[:,2]-points_eig_vals[:,0])/points_eig_vals[:,2]
         w_points_corner = self.NormalizeData(w_points_corner)
         return w_points_corner
 
@@ -305,7 +311,7 @@ class FeatureLines(object):
         cmap = matplotlib.cm.get_cmap('viridis')
         rgba = cmap(weights)
         rgb = rgba[:,:3]
-        self.pcd.colors = o3d.utility.Vector3dVector(np.asarray(rgb).astype(np.float))
+        self.pcd.colors = o3d.utility.Vector3dVector(np.asarray(rgb).astype("float"))
         o3d.visualization.draw_geometries([self.pcd])
     def show_pattern(self,pattern):
             groups = pattern
@@ -314,5 +320,5 @@ class FeatureLines(object):
                 color = (random.randrange(0, 255),0,random.randrange(0, 255))
                 for nodes in group:
                     colors[nodes] = color
-            self.pcd.colors = o3d.utility.Vector3dVector(np.asarray(colors).astype(np.float) / 255.0)
+            self.pcd.colors = o3d.utility.Vector3dVector(np.asarray(colors).astype("float") / 255.0)
             o3d.visualization.draw_geometries([self.pcd])

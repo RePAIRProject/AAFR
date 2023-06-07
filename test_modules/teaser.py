@@ -3,9 +3,9 @@ import numpy as np
 from utils.helpers import *
 import pandas as pd 
 from evaluation_pairwise.utils import chamfer_distance
+from copy import deepcopy,copy
 
 def register_fragments(pcd1, pcd2, voxel_size=2, resample_factor=5, verbose=False):
-
 
     dist1 = pcd1.compute_nearest_neighbor_distance()
     dist2 = pcd1.compute_nearest_neighbor_distance()
@@ -82,8 +82,10 @@ def run(obj1_seg_parts_array, obj2_seg_parts_array, MIN_PCD_SIZE=1000):
     o1s = []
     o2s = [] 
     
-    for o1, pcd_part1 in enumerate(obj1_seg_parts_array):
-        for o2, pcd_part2 in enumerate(obj2_seg_parts_array):
+    for o1, seg_part1 in enumerate(obj1_seg_parts_array):
+        for o2, seg_part2 in enumerate(obj2_seg_parts_array):
+            pcd_part1 = seg_part1.pcd
+            pcd_part2 = seg_part2.pcd
             cur_frag1_size = len(pcd_part1.points)
             cur_frag2_size = len(pcd_part2.points)
             frag1_size.append(cur_frag1_size)

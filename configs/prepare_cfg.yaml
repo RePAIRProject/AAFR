@@ -3,7 +3,7 @@
 r : [0.2, 0.2, 0.1]
 t : [-0.5, -0.5, -0.5]
 
-voxel_size : 15000
+voxel_size : 5000
 move_to_origin : False
 
 output_folder : 'data'

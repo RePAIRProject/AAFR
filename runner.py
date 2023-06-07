@@ -470,7 +470,7 @@ class fragment_reassembler(object):
         return 1
 
     def evaluate_against_gt(self):
-        if not self.gt_m:
+        if not self.gt:
             print("Set the ground truth first!")
             self.error = -1
         else:

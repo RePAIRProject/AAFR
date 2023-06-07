@@ -231,11 +231,8 @@ def run(Obj_url, pipline_variables, folder_path=''):
     border_nodes = [node for branch in valid_nodes for node in branch]
 
     dilated_border = dilate_border(Obj,border_nodes,dilation_size)
-
-
     dilated_faces = get_sides(isolated_islands_pruned_graph, dilated_border)
 
-    pdb.set_trace()
     print("got faces")
 
     node_face = {}
@@ -279,7 +276,6 @@ def run(Obj_url, pipline_variables, folder_path=''):
     # o3d.visualization.draw_geometries([Obj.pcd])
 
     return Obj,Objects
-
 
 def load_obj(Obj_url, small, large, N):
     if Obj_url.split("_")[-1] == "0.obj":

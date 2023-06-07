@@ -364,20 +364,16 @@ class fragment_reassembler(object):
     to debug and understand the codebase better and for further extension/modification
     of the pipeline components 
     """
-    def __init__(self, broken_objects, parameters, name='broken_objects', show_results=False, save_results=False, dir_name=None):
+    def __init__(self, broken_objects, variables_as_list, parameters, name='broken_objects', show_results=False, save_results=False, dir_name=None):
         
         if not os.path.exists("pipline_modules/"+parameters['processing_module']+".py") :
             print("Error !  cannot find "+parameters['processing_module']+" module in pipline_modules")
 
-        if save_results:
-            if not os.path.exists("results"):
-                os.mkdir("results")
-            self.results_path = "results"
         self.pair_name = parameters
         self.obj1_url = broken_objects['path_obj1']
         self.obj2_url = broken_objects['path_obj2']
-        self.pipeline_variables = broken_objects['variables_as_list']
-        self.init_R_T = parameters['init_R_T']
+        self.pipeline_variables = variables_as_list
+        self.init_R_T = parameters['challenge_R_T']
         self.pipeline_name = parameters['processing_module']
         self.registration_name = parameters['registration_module']
         self.evaluation_list_names = parameters['evaluation_metrics']
@@ -435,12 +431,60 @@ class fragment_reassembler(object):
         self.processing_pipeline.write_segmented_regions(self.obj2_seg_parts_array, self.obj2_colored_regions, self.output_dir, self.obj2_name)
         print('done')
 
-    def process_fragments(self):
-        """Read and process fragments (breaking curve segmentation)"""
-        print("_________________________First Object_________________________")
-        self.Obj1, self.Obj1_array = self.processing_pipeline.run(self.obj1_url,self.pipeline_variables)
-        print("_________________________Second Object_________________________")
-        self.Obj2, self.Obj2_array = self.processing_pipeline.run(self.obj2_url,self.pipeline_variables)
+    def save_fragments(self, pcl_name=''):
+        """Save the fragments to ply files"""
+        os.makedirs(os.path.join(self.output_dir, 'pointclouds'), exist_ok=True)
+        o3d.io.write_point_cloud(os.path.join(self.output_dir, 'pointclouds', f'obj_{pcl_name}_part1.ply'), self.obj1.pcd)
+        o3d.io.write_point_cloud(os.path.join(self.output_dir, 'pointclouds', f'obj_{pcl_name}_part2.ply'), self.obj2.pcd)
+
+    def save_info(self):
+        info = {
+            'name_o1': self.obj1_name,
+            'name_o2': self.obj2_name
+        }
+        with open(os.path.join(self.output_dir, 'info.json'), 'w') as ij:
+            json.dump(info, ij, indent=2) 
+
+    def set_gt(self, gt):
+        """Manually set the ground truth matrices"""
+        self.gt = gt
+        # self.gt_r = gt[:3, :3] 
+        # self.gt_t = gt[:3, 3]
+
+    def register_segmented_regions(self):
+        """Register segmented regions"""
+        print("_________________________Registration_________________________")
+        self.candidates_registration = self.registration.run(self.obj1_seg_parts_array, self.obj2_seg_parts_array)
+        self.sorted_candidates_registration = self.candidates_registration.sort_values('chamfer_distance')
+        self.best_registration = self.sorted_candidates_registration.head(1)
+        pdb.set_trace()
+
+    def save_registration_results(self):
+        folder_results = os.path.join(self.output_dir, f"registration_{self.pair_name}")
+        os.makedirs(folder_results, exist_ok=True)
+        self.sorted_candidates_registration.to_csv(os.path.join(folder_results, 'sorted_candidates_registration.csv'))
+        self.best_registration.to_csv(os.path.join(folder_results, 'best_registration.csv'))
+
+    def evaluate_error(self):
+        """Evaluate against gt and estimate rmse(R) and rmse(T)"""
+        return 1
+
+    def evaluate_against_gt(self):
+        if not self.gt_m:
+            print("Set the ground truth first!")
+            self.error = -1
+        else:
+            self.error = self.evaluate_error()
+
+    def save_evaluation_results(self):
+        folder_eval_res = os.path.join(self.output_dir, f"evaluation_{self.pair_name}")
+        os.makedirs(folder_results, exist_ok=True)
+        with open(os.path.join(folder_eval_res, 'evaluation.json'), 'w') as ejf:
+            json.dump(self.error, ejf, indent=3)
+
+
+    ### NOT SURE IF NEEDED
+    ### parked here for now
 
     def set_fragments_in_place(self, T_1, T_2):
         """Move both objects"""
@@ -463,36 +507,6 @@ class fragment_reassembler(object):
         """Just visualize the fragments"""
         o3d.visualization.draw_geometries([self.obj1, self.obj2], 'Fragments')
 
-    def save_fragments(self, pcl_name=''):
-        """Save the fragments to ply files"""
-        os.makedirs(os.path.join(self.output_dir, 'pointclouds'), exist_ok=True)
-        o3d.io.write_point_cloud(os.path.join(self.output_dir, 'pointclouds', f'obj_{pcl_name}_part1.ply'), self.obj1.pcd)
-        o3d.io.write_point_cloud(os.path.join(self.output_dir, 'pointclouds', f'obj_{pcl_name}_part2.ply'), self.obj2.pcd)
-
-    def save_info(self):
-        info = {
-            'name_o1': self.obj1_name,
-            'name_o2': self.obj2_name
-        }
-        with open(os.path.join(self.output_dir, 'info.json'), 'w') as ij:
-            json.dump(info, ij, indent=2) 
-
-    def set_gt_M(self, GT):
-        """Manually set the ground truth matrix"""
-        self.RM_ground = GT
-
-    def set_gt_R_T(self, R, T):
-        """Manually set the ground truth matrix (rotation and translation separate)"""
-        RM_ground = np.eye(4)
-        RM_ground[:3, :3] = R
-        RM_ground[:3, 3] = T
-        self.RM_ground = RM_ground
-
-    def register_fragments(self, init_T=np.eye(4)):
-        """Register fragments (apply T before registration, if given)"""
-        print("_________________________Registration_________________________")
-        self.result_transformation_arr = self.registration.run(self.Obj1_array, self.Obj2_array, init_T)
-
     def evaluate_results(self):
         print("_________________________Evaluation_________________________")
         self.results = [{**{"o1":o1, "o2":o2},**self.evaluate(self.RM_ground, result_transformation)} for o1, o2, result_transformation in self.result_transformation_arr]
@@ -513,12 +527,4 @@ class fragment_reassembler(object):
         for k in self.winner.keys():
             print(f"{k}: {self.winner[k]}")
         
-    def save_results(self, save_all=True, save_parameters=True):
-        if not self.sorted_results:
-            self.get_winner()
-        path_error = os.path.join(self.results_path, f"error_{self.pair_name}.csv")
-        df_test = pd.DataFrame(self.sorted_results)
-        df_test["transformations"] = [el[2] for el in self.result_transformation_arr]
-        df_test.to_csv(path_error, encoding='utf-8')
-
-
+ 

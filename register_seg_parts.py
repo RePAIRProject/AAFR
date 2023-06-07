@@ -147,7 +147,7 @@ def main():
                         transf_icp.append(np.eye(4))
                         chamfer_distances.append(MIN_PCD_SIZE)
 
-                    else:ORIGINAL
+                    else:
                         target = copy(pcd_part1)
                         source = copy(pcd_part2)
                         icp_sol, teaser_sol, num_corrs = register_fragments(source, target)

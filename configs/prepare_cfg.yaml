@@ -1,0 +1,21 @@
+# configuration file 
+
+r : [0.2, 0.2, 0.1]
+t : [-0.5, -0.5, -0.5]
+
+voxel_size : 15000
+move_to_origin : False
+
+output_folder : 'data'
+
+data_list : [
+  [
+    "/media/lucap/big_data/datasets/pairwise/ali/DrinkBottle/fractured_62/piece_0.obj", 
+    "/media/lucap/big_data/datasets/pairwise/ali/DrinkBottle/fractured_62/piece_1.obj"
+  ],
+  [
+    "/media/lucap/big_data/datasets/pairwise/ali/DrinkBottle/fractured_70/piece_0.obj",
+    "/media/lucap/big_data/datasets/pairwise/ali/DrinkBottle/fractured_70/piece_1.obj",
+  ]
+]
+

@@ -13,6 +13,7 @@ from itertools import count
 from copy import copy, deepcopy
 random.seed(0)
 np.random.seed(0)
+
 def down_sample_to(obj,num):
     if len(obj.points) < num:
         print("num should be less than number of voxels in the objects, no down sampling will happen !")

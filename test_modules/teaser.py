@@ -1,8 +1,70 @@
 import open3d as o3d
 import numpy as np
 from utils.helpers import *
+import pandas as pd 
+from evaluation_pairwise.utils import chamfer_distance
 
-def run(obj1_seg_parts_array, obj2_seg_parts_array):
+def register_fragments(pcd1, pcd2, voxel_size=2, resample_factor=5, verbose=False):
+
+
+    dist1 = pcd1.compute_nearest_neighbor_distance()
+    dist2 = pcd1.compute_nearest_neighbor_distance()
+    #print(dist1, dist2)
+    #pdb.set_trace()
+    pcd1 = pcd1.voxel_down_sample(np.mean(dist1) * resample_factor)
+    pcd2 = pcd2.voxel_down_sample(np.mean(dist2) * resample_factor)
+    
+    #o3d.visualization.draw_geometries([pcd1, pcd2])
+    # should be taken from conf file
+    #voxel_size=voxel_size 
+    # the fpfh is very sensitive to this parameter! larger is better
+
+    # Extract features
+    A_xyz = pcd2xyz(pcd1) # np array of size 3 by N
+    B_xyz = pcd2xyz(pcd2) # np array of size 3 by N
+
+    # extract FPFH features
+    A_feats = extract_fpfh(pcd1, voxel_size=voxel_size)
+    B_feats = extract_fpfh(pcd2, voxel_size=voxel_size)
+
+    # establish correspondences by nearest neighbour search in feature space
+    corrs_A, corrs_B = find_correspondences(
+        A_feats, B_feats, mutual_filter=True)
+    A_corr = A_xyz[:,corrs_A] # np array of size 3 by num_corrs
+    B_corr = B_xyz[:,corrs_B] # np array of size 3 by num_corrs
+    num_corrs = A_corr.shape[1]
+    if verbose:
+        print(f'matched {num_corrs} fpfh correspondences')
+
+    # robust global registration using TEASER++
+    NOISE_BOUND = voxel_size
+    teaser_solver = get_teaser_solver(NOISE_BOUND)
+    teaser_solver.solve(A_corr,B_corr)
+    solution = teaser_solver.getSolution()
+    R_teaser = solution.rotation
+    t_teaser = solution.translation
+    T_teaser = Rt2T(R_teaser,t_teaser)
+
+    # Maybe it would be a good idea to include a flag in the run() 
+    # to control whether to use ICP refinement after teaser or not
+    # for now we include it anyway
+
+    # if refinement == True:
+
+    # local refinement using ICP
+    icp_sol = o3d.pipelines.registration.registration_icp(
+        pcd1, pcd2, NOISE_BOUND, T_teaser,
+        o3d.pipelines.registration.TransformationEstimationPointToPoint(),
+        o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=100))
+    refined_T = icp_sol.transformation
+
+    if verbose:
+        print("Teaser transformation:", T_teaser)
+        print("Final solution after ICP:", refined_T)
+    
+    return icp_sol, solution, num_corrs
+
+def run(obj1_seg_parts_array, obj2_seg_parts_array, MIN_PCD_SIZE=1000):
 
     # prepare the array containing statistics
     candidates_registration = pd.DataFrame()

@@ -8,7 +8,7 @@ pipeline_parameters = {
 }
 
 # data_list
-num_of_points = 15000 # resampling to n points
+num_of_points = 10000 # resampling to n points
 # see paper for details (graph creation)
 to = 100
 tb = 0.1

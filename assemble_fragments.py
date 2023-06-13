@@ -48,6 +48,7 @@ def main(args):
         print('-' * print_line_length)
         fr_ass.register_segmented_regions()
         fr_ass.save_registration_results()
+        fr_ass.save_registered_pcls()
 
         # if we have ground truth, evaluate it
         if 'solution' in broken_objects.keys():

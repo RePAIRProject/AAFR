@@ -457,13 +457,21 @@ class fragment_reassembler(object):
         self.candidates_registration = self.registration.run(self.obj1_seg_parts_array, self.obj2_seg_parts_array)
         self.sorted_candidates_registration = self.candidates_registration.sort_values('chamfer_distance')
         self.best_registration = self.sorted_candidates_registration.head(1)
-        pdb.set_trace()
 
     def save_registration_results(self):
-        folder_results = os.path.join(self.output_dir, f"registration_{self.pair_name}")
-        os.makedirs(folder_results, exist_ok=True)
-        self.sorted_candidates_registration.to_csv(os.path.join(folder_results, 'sorted_candidates_registration.csv'))
-        self.best_registration.to_csv(os.path.join(folder_results, 'best_registration.csv'))
+        self.folder_registration_results = os.path.join(self.output_dir, "registration")
+        os.makedirs(self.folder_registration_results, exist_ok=True)
+        self.sorted_candidates_registration.to_csv(os.path.join(self.folder_registration_results, 'sorted_candidates_registration.csv'))
+        self.best_registration.to_csv(os.path.join(self.folder_registration_results, 'best_registration.csv'))
+        
+    def save_registered_pcls(self):
+        obj1_to_draw = copy(self.obj1.pcd)
+        obj2_to_draw = copy(self.obj2.pcd)
+        obj1_to_draw.paint_uniform_color([1, 1, 0])
+        obj2_to_draw.paint_uniform_color([0, 0, 1])
+        obj2_to_draw = obj2_to_draw.transform(self.best_registration['transf_teaser'])
+        o3d.io.write_point_cloud(os.path.join(self.folder_registration_results, 'obj1.ply'), obj1_to_draw)
+        o3d.io.write_point_cloud(os.path.join(self.folder_registration_results, 'obj2.ply'), obj2_to_draw)
 
     def evaluate_error(self):
         """Evaluate against gt and estimate rmse(R) and rmse(T)"""

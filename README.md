@@ -8,10 +8,24 @@ We tested it on [the breaking bad dataset](https://breaking-bad-dataset.github.i
 
 # 1) Description
 
-It consists of several steps:
-- it creates two graphs from the pointcloud (one for the whole point cloud, one for the borders), then it computes corner penalties to detect points belonging to *breaking curves* (edges in 3D data). 
-- following these breaking curves,
+Receiving as input the point cloud of each broken part of the object (initially we start with two, but it will be extended to multiple, the work is already in progress)).
 
+The pipeline consists of several steps:
+- it creates two graphs from each pointcloud (one for the whole point cloud, one for the borders), then it computes corner penalties to detect points belonging to *breaking curves* (edges in 3D data). 
+- following these breaking curves, the pointcloud is segmented into regions. 
+- each possible pair of regions (excluding super small regions) is registered and the registration is evaluated. The best registration is selected and applied to the pointcloud.
+
+# 2) Installation
+
+Build/Installation instructions (including requirements and dataset).
+
+# 3) Usage
+
+We created a sample version in `assemble_fragments.py`.
+
+# 4) Known Issues
+
+The repo contains *a lot* of experiments, which will be organized with time. Use the scripts mentioned above for a guaranteed execution and use the rest of the code at your own risk.
 
 # 5) Relevant publications
 

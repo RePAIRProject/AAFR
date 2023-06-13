@@ -1,7 +1,5 @@
 # parameters for the pipeline
 pipeline_parameters = {
-    # angles and translation parameters for initial "challenge" position
-    'challenge_R_T' : [[0.2, 0.2, 0.1], [-0.5, -0.5, -0.5]], 
     'processing_module' : "standard",
     'registration_module' : "teaser",
     'evaluation_metrics' : ["rms"]
@@ -18,12 +16,12 @@ N = 15
 variables_as_list =  [num_of_points, num_of_points, N, to, to, to, tb, tb, tb, dil, thre]
 
 import os, pdb, json
-name = f'drinkbottle_{num_of_points}'
+name = f'experiment_name_{num_of_points}'
 output_dir = os.path.join('3dvr_results', name)
 os.makedirs(output_dir, exist_ok=True)
 
 # list of broken objects (for now pairs)
-data_folder = 'data' 
+data_folder = 'data'
 data_list = []
 
 for category_folder in os.listdir(data_folder):
@@ -44,4 +42,4 @@ for category_folder in os.listdir(data_folder):
                 solution = json.load(sj)
             broken_obj_dict['solution'] = solution
 
-        data_list.append(broken_obj_dict)       
+        data_list.append(broken_obj_dict)

@@ -1,4 +1,4 @@
-# configuration file 
+# configuration file
 
 r : [0.2, 0.2, 0.1]
 t : [-0.5, -0.5, -0.5]
@@ -10,12 +10,11 @@ output_folder : 'data'
 
 data_list : [
   [
-    "/media/lucap/big_data/datasets/pairwise/ali/DrinkBottle/fractured_62/piece_0.obj", 
-    "/media/lucap/big_data/datasets/pairwise/ali/DrinkBottle/fractured_62/piece_1.obj"
+    "/path_to_breaking_bad_dataset/DrinkBottle/fractured_62/piece_0.obj",
+    "/path_to_breaking_bad_dataset/DrinkBottle/fractured_62/piece_1.obj"
   ],
   [
-    "/media/lucap/big_data/datasets/pairwise/ali/DrinkBottle/fractured_70/piece_0.obj",
-    "/media/lucap/big_data/datasets/pairwise/ali/DrinkBottle/fractured_70/piece_1.obj",
+    "/path_to_breaking_bad_dataset/DrinkBottle/fractured_70/piece_0.obj",
+    "/path_to_breaking_bad_dataset/DrinkBottle/fractured_70/piece_1.obj",
   ]
 ]
-

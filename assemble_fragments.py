@@ -1,6 +1,6 @@
 import argparse
 import importlib
-import pdb 
+import pdb
 from runner import fragment_reassembler
 
 def main(args):
@@ -8,7 +8,7 @@ def main(args):
     print_line_length = 65
     module_name = f"configs.{args.cfg}"
     cfg = importlib.import_module(module_name)
-    
+
     print("\nWill try to assemble:")
     for i, broken_objects in enumerate(cfg.data_list):
         category = broken_objects["category"]
@@ -38,7 +38,7 @@ def main(args):
         print('-' * print_line_length)
         fr_ass.detect_breaking_curves()
         fr_ass.save_breaking_curves()
-        
+
         # 3.2) segmentation
         print('-' * print_line_length)
         fr_ass.segment_regions()
@@ -50,11 +50,12 @@ def main(args):
         fr_ass.save_registration_results()
         fr_ass.save_registered_pcls()
 
+        # TODO: untested! probably not working smooth without debugging
         # if we have ground truth, evaluate it
-        if 'solution' in broken_objects.keys():
-            print('-' * print_line_length)
-            fr_ass.evaluate_against_gt()
-            fr_ass.save_evaluation_results()
+        # if 'solution' in broken_objects.keys():
+        #     print('-' * print_line_length)
+        #     fr_ass.evaluate_against_gt()
+        #     fr_ass.save_evaluation_results()
 
         print('#' * print_line_length)
 

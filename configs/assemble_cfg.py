@@ -6,7 +6,7 @@ pipeline_parameters = {
 }
 
 # data_list
-num_of_points = 10000 # resampling to n points
+num_of_points = 20000 # resampling to n points
 # see paper for details (graph creation)
 to = 100
 tb = 0.1
@@ -16,7 +16,7 @@ N = 15
 variables_as_list =  [num_of_points, num_of_points, N, to, to, to, tb, tb, tb, dil, thre]
 
 import os, pdb, json
-name = f'experiment_name_{num_of_points}'
+name = f'3dvr_{num_of_points}'
 output_dir = os.path.join('3dvr_results', name)
 os.makedirs(output_dir, exist_ok=True)
 

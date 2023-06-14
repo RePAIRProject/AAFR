@@ -59,7 +59,7 @@ def main(args):
 
         print('#' * print_line_length)
 
-    pdb.set_trace()
+    #pdb.set_trace()
     return 1
 
 if __name__ == '__main__':

@@ -373,7 +373,6 @@ class fragment_reassembler(object):
         self.obj1_url = broken_objects['path_obj1']
         self.obj2_url = broken_objects['path_obj2']
         self.pipeline_variables = variables_as_list
-        self.init_R_T = parameters['challenge_R_T']
         self.pipeline_name = parameters['processing_module']
         self.registration_name = parameters['registration_module']
         self.evaluation_list_names = parameters['evaluation_metrics']
@@ -469,7 +468,7 @@ class fragment_reassembler(object):
         obj2_to_draw = copy(self.obj2.pcd)
         obj1_to_draw.paint_uniform_color([1, 1, 0])
         obj2_to_draw.paint_uniform_color([0, 0, 1])
-        obj2_to_draw = obj2_to_draw.transform(self.best_registration['transf_teaser'])
+        obj2_to_draw = obj2_to_draw.transform(self.best_registration['transf_teaser'].item())
         o3d.io.write_point_cloud(os.path.join(self.folder_registration_results, 'obj1.ply'), obj1_to_draw)
         o3d.io.write_point_cloud(os.path.join(self.folder_registration_results, 'obj2.ply'), obj2_to_draw)
 

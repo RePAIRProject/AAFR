@@ -61,8 +61,9 @@ We prepared an example based on the breaking bad dataset, please change the `/pa
 Then run:
 
 ```bash
-prepare_challenge.py --cfg configs/prepare_cfg.yaml
+python prepare_challenge.py --cfg configs/prepare_cfg.yaml
 ```
+
 ##### WARNING:
 This is prepared for the breaking bad dataset, so it assumes the data has subfolder (category, fracture_id, objects_files) and re-creates this structures in the output folder. If you have different structure, change the prepare challenge code (for example lines 65 and 66 of `prepare_challenge.py` extract category and fracture_id from the path)
 
@@ -77,8 +78,9 @@ You can check there that everything worked (it will create subfolders and write 
 
 Assuming the data is ready, we can run the script to assemble the data. It works on a loop, so it will reconstruct all the folders.
 We created a script for the assembly, which can be run as:
+
 ```bash
-assemble_fragments.py --cfg assemble_cfg
+python assemble_fragments.py --cfg assemble_cfg
 ```
 This will assemble all the broken objects and create a lot (maybe too much? The call to the saving functions (detached from the computational one for ease of use) are easy to disable, check the code in `assemble_fragments.py` and look for `fr_ass.save_`)
 

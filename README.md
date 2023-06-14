@@ -1,7 +1,7 @@
 # AAFR (Ali Alagrami Fresco Reconstruction)
 
 The AAFR is a framework for virtually reassembling broken objects.
-[Click here to check out the project page for more details](https://repairproject.github.io/AAFR_web/)
+[Click here to check out the project page for more details](https://repairproject.github.io/AAFR/)
 
 It was developed within the [RePAIR european project](https://github.com/RePAIRProject) but the reconstruction works also for other broken objects.
 We tested it on [the breaking bad dataset](https://breaking-bad-dataset.github.io/) and on [the brick from the TU-Wien dataset](https://www.geometrie.tuwien.ac.at/geom/nbkdir/hofer/3dpuzzles/brick/brick.html).

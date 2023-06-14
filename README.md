@@ -21,8 +21,19 @@ We do not have yet a clean environment, but we have a `requirements.txt` file wh
 ```bash
 pip install -r requirements.txt
 ```
+The registration part can be achieved using different modules. Although at the publication time we used mostly ICP, currently the code uses [TEASER++](https://github.com/MIT-SPARK/TEASER-plusplus) to register segmented regions, because is more robust to the initial position. 
+So you need to install and link teaser, check the [getting started section](https://github.com/MIT-SPARK/TEASER-plusplus#getting-started) or directly the [instructions for the python bindings here](https://teaser.readthedocs.io/en/latest/installation.html#installing-python-bindings).
+
+ICP can be used, but the `test_icp.py` file should be slightly modified (should return a panda dataframe with results (see `teaser.py`), not only an array). Hopefully this will be done soon, but using TEASER++ is recommended to get the best results.
+If you really want to use ICP change the `pipeline_parameters` in `configs/assemble_cfg.py` and set `registration_module` to `icp` and check the `test_module/icp.py` file (it needs to be implemented)
+pipeline_parameters = {
+    'processing_module' : "standard",
+    'registration_module' : "teaser",
+    'evaluation_metrics' : ["rms"]
+}
+
 The code does not rely on GPU and uses widely used libraries plus the code in this folder (so make sure the root path is included).
-It was tested using `python 3.9.0` on `Ubuntu 20.04`..
+It was tested using `python 3.9.0` on `Ubuntu 20.04`.
 
 # 3) Usage
 

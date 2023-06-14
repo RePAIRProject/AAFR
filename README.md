@@ -91,3 +91,21 @@ To cite the paper:
 
 The code is released under the Creative Commons Zero v1.0 Universal License.
 For more details, refer to [the license itself](https://github.com/RePAIRProject/AAFR/blob/master/LICENSE).
+
+## 7) Project Page 
+
+The project page is available [here](https://repairproject.github.io/AAFR/)
+
+*Reassembling Broken Objects using Breaking Curves*
+
+Ali Alagrami*, Luca Palmieri*, Sinem Aslan*, Marcello Pelillo, Sebastiano Vascon
+
+Ca' Foscari University of Venice, Department of Computer Science (DAIS)
+
+CVPR 2023 Workshop on 3D Vision and Robotics (3DVR)
+
+This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a>.
+You are free to borrow the of this website, we just ask that you link back to this page in the footer. <br> This website is licensed under a <a rel="license"  href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
+Commons Attribution-ShareAlike 4.0 International License</a>.
+
+Shootout to <a href="https://github.com/eliahuhorwitz" target="_blank">Eliahu Horwitz</a> for the template. Thanks.

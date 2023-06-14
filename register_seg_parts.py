@@ -10,7 +10,6 @@ from evaluation_pairwise.utils import chamfer_distance
 
 def register_fragments(pcd1, pcd2, voxel_size=2, resample_factor=5, verbose=False):
 
-
     dist1 = pcd1.compute_nearest_neighbor_distance()
     dist2 = pcd1.compute_nearest_neighbor_distance()
     #print(dist1, dist2)

@@ -84,8 +84,8 @@ This will assemble all the broken objects and create a lot (maybe too much? The 
 
 The results will be in the output folder (check the name, line 19 of `configs/assembly_cfg.py` file) and will contain segmented data (colored) registered data and a copy of the pointcloud (and also colored borders) so you should be able to easily visualize all intermediate steps (if you have no idea, use Meshlab to visualize `.ply` files)
 
-##### Question: why before a `.yaml` file and now a `.py` file as config (with different syntax)?
-*Answer: If you raised it, you have a point. They were created at different times, and the `.py` file is very useful to create nested folders. They are relatively easy to use so it should be possible to understand both, sorry for the change`.*
+**Why before a `.yaml` file and now a `.py` file as config (with different syntax)?**
+They were created at different times, and the `.py` file is very useful to create nested folders. They are relatively easy to use so it should be possible to understand both, sorry for the change`.
 
 # 4) Known Issues
 

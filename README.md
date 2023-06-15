@@ -53,6 +53,14 @@ The data collection process from the RePAIR project is yet to be finished and th
 However, the code can be easily modified to work with different kind of data (it uses pointcloud, but resampling a mesh in a pointcloud is easy and you find an example in the `prepare_challenge.py` script if needed).
 If there are issues or you need help, please do open an issue and ask.
 
+## How do I use the code?
+
+If you want to use it on your own data, check the [data preparation section](#data-preparation).
+
+If you want to assemble fragments (you have prepared data), check the [assembling fragment section](#assembling-fragments).
+
+If you have no idea, check the [demo file](demo.md) for a quick run (everything is prepared).
+
 ## Data preparation
 If you already have the pointclouds of the broken objects in some random position, you can skip this part.
 
@@ -82,12 +90,17 @@ We created a script for the assembly, which can be run as:
 ```bash
 python assemble_fragments.py --cfg assemble_cfg
 ```
+
 This will assemble all the broken objects and create a lot (maybe too much? The call to the saving functions (detached from the computational one for ease of use) are easy to disable, check the code in `assemble_fragments.py` and look for `fr_ass.save_`)
 
 The results will be in the output folder (check the name, line 19 of `configs/assembly_cfg.py` file) and will contain segmented data (colored) registered data and a copy of the pointcloud (and also colored borders) so you should be able to easily visualize all intermediate steps (if you have no idea, use Meshlab to visualize `.ply` files)
 
 **Why before a `.yaml` file and now a `.py` file as config (with different syntax)?**
 They were created at different times, and the `.py` file is very useful to create nested folders. They are relatively easy to use so it should be possible to understand both, sorry for the change`.
+
+## Demo Run
+
+There is a *demo* run prepared. Check the [demo file](demo.md) for more info.
 
 # 4) Known Issues
 

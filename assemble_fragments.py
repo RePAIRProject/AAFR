@@ -2,6 +2,7 @@ import argparse
 import importlib
 import pdb
 from runner import fragment_reassembler
+import os 
 
 def main(args):
 
@@ -30,7 +31,9 @@ def main(args):
         fr_ass.load_objects()
 
         # set output directory, save fragments and information there
-        fr_ass.set_output_dir(cfg.output_dir)
+        broken_objects_out_dir = os.path.join(cfg.output_dir, name)
+        os.makedirs(broken_objects_out_dir, exist_ok=True)
+        fr_ass.set_output_dir(broken_objects_out_dir)
         fr_ass.save_fragments(cfg.name)
         fr_ass.save_info()
 

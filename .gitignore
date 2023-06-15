@@ -10,7 +10,7 @@
 
 # processing files
 *.out
-*.txt
+libs.txt
 *.obj
 
 #3dFiles

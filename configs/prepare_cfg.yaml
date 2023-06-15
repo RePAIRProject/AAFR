@@ -13,9 +13,9 @@ data_list : [
     "/path_to_breaking_bad_dataset/DrinkBottle/fractured_62/piece_0.obj", 
     "/path_to_breaking_bad_dataset/DrinkBottle/fractured_62/piece_1.obj"
   ],
-  [
-    "/path_to_breaking_bad_dataset/DrinkBottle/fractured_70/piece_0.obj",
-    "/path_to_breaking_bad_dataset/DrinkBottle/fractured_70/piece_1.obj",
-  ]
+  # [
+  #   "/path_to_breaking_bad_dataset/DrinkBottle/fractured_63/piece_0.obj",
+  #   "/path_to_breaking_bad_dataset/DrinkBottle/fractured_63/piece_1.obj",
+  # ]
 ]
 

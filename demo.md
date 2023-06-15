@@ -16,16 +16,15 @@ You should get an output similar to:
 > python assemble_fragments.py --cfg assemble_cfg
 
 Will try to assemble:
-0) DrinkBottle_fractured_70
-1) DrinkBottle_fractured_62
+0) DrinkBottle_fractured_62
 
 #################################################################
-Current broken object: fractured_70 (DrinkBottle)
+Current broken object: fractured_62 (DrinkBottle)
 -----------------------------------------------------------------
-Loading object 1: data/DrinkBottle/fractured_70/objects/obj1_challenge.ply
-100%|███████████████████████████████████████████████████████████████████████████| 29950/29950 [00:04<00:00, 6008.02it/s]
-Loading object 2: data/DrinkBottle/fractured_70/objects/obj2_challenge.ply
-100%|███████████████████████████████████████████████████████████████████████████| 29909/29909 [00:04<00:00, 6066.83it/s]
+Loading object 1: data/DrinkBottle/fractured_62/objects/obj1_challenge.ply
+100%|███████████████████████████████████████████████████████████████████████████| 29883/29883 [00:05<00:00, 5920.63it/s]
+Loading object 2: data/DrinkBottle/fractured_62/objects/obj2_challenge.ply
+100%|███████████████████████████████████████████████████████████████████████████| 29767/29767 [00:04<00:00, 5999.79it/s]
 done
 -----------------------------------------------------------------
 Detecting breaking curves for object 1..
@@ -37,6 +36,8 @@ And it will continue (after breaking curves there is segmentation and registrati
 It may take a while (depending on computer). 
 The segmentation step is the slowest at the moment, and it may take some minutes. 
 The runtime changed a lot on different computers, from some minutes to almost half an hour.
+
+This is done for one object (two parts) but everything is configured to accept lists of data, so that it can be run on a batch of data
 
 This will create an output folder, whose name is decided in `configs/assemble_cfg.py`, as:
 ```python

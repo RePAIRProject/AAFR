@@ -4,10 +4,6 @@
 # to generate your .gitignore file.
 
 # web application files
-/data
-
-
-# web application files
 /results/*
 /logs/*
 

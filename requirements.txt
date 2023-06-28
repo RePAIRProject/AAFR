@@ -8,3 +8,4 @@ networkx
 disjoint_set
 p_tqdm
 transforms3d
+hdbscan

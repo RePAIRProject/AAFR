@@ -343,46 +343,55 @@ def detect_breaking_curves(obj, pipeline_variables):
 def write_breaking_curves(obj, borders_indices, output_dir, obj_name):
     border_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(np.asarray(obj.pcd.points)[borders_indices]))
     ppd = copy(obj.pcd)
+    inner_ppd = copy(obj.pcd)
+    inner_ppd = inner_ppd.select_by_index(borders_indices, invert=True)
+    
     p_colors = np.zeros((len(ppd.points), 3))
     p_colors[:, 1] = 1
     p_colors[borders_indices] = [1, 0, 0]
     ppd.colors = o3d.utility.Vector3dVector(p_colors)
     o3d.io.write_point_cloud(os.path.join(output_dir, f'col_borders_{obj_name}.ply'), ppd)
     o3d.io.write_point_cloud(os.path.join(output_dir, f'borders_{obj_name}.ply'), border_pcd)
+    o3d.io.write_point_cloud(os.path.join(output_dir, f'inner_{obj_name}.ply'), inner_ppd)
 
-def segment_regions(obj, borders_indices, isolated_islands_pruned_graph):   
-    seg_regions_indices = get_sides(isolated_islands_pruned_graph, borders_indices)
-    node_face = {}
-    face_nodes = []
-    for idx,(_,face) in enumerate(seg_regions_indices):
-        for node in face:
-            node_face[node] = idx
-        face_nodes.append(face)
-    all_dilated = [node for  _,face in seg_regions_indices for node in face]
-    all_dilated.extend([node for node in borders_indices])
-    left_overs = list(set(range(len(obj.pcd.points)))-set(all_dilated))
-    border_left_overs = left_overs+borders_indices
-    print('Assigning border nodes..')
-    expanded_faces = knn_expand(obj,border_left_overs,node_face,face_nodes,size=5)
-    #print("expanded")
-    seg_parts_array = []
-    for f, expanded_face in enumerate(expanded_faces):
-        mask = np.isin(np.arange(0, len(obj.pcd.points), 1).tolist(),[node for node in expanded_face])
-        Obj_tmp = copy(obj)
-        Obj_tmp.pcd = copy(obj.pcd)
-        Obj_tmp.pcd.points = o3d.utility.Vector3dVector(np.asarray(obj.pcd.points)[mask])
-        Obj_tmp.pcd.paint_uniform_color(np.asarray(colors[f % len(colors)]).astype("float") / 255.0)
-        seg_parts_array.append(Obj_tmp)
+def segment_regions(obj, borders_indices, isolated_islands_pruned_graph, mode="ALI"):   
+    if mode=="ALI":
+        seg_regions_indices = get_sides(isolated_islands_pruned_graph, borders_indices)
+        node_face = {}
+        face_nodes = []
+        for idx,(_,face) in enumerate(seg_regions_indices):
+            for node in face:
+                node_face[node] = idx
+            face_nodes.append(face)
+        all_dilated = [node for  _,face in seg_regions_indices for node in face]
+        all_dilated.extend([node for node in borders_indices])
+        left_overs = list(set(range(len(obj.pcd.points)))-set(all_dilated))
+        border_left_overs = left_overs+borders_indices
+        print('Assigning border nodes..')
+        expanded_faces = knn_expand(obj,border_left_overs,node_face,face_nodes,size=5)
+        #print("expanded")
+        seg_parts_array = []
+        for f, expanded_face in enumerate(expanded_faces):
+            mask = np.isin(np.arange(0, len(obj.pcd.points), 1).tolist(),[node for node in expanded_face])
+            Obj_tmp = copy(obj)
+            Obj_tmp.pcd = copy(obj.pcd)
+            Obj_tmp.pcd.points = o3d.utility.Vector3dVector(np.asarray(obj.pcd.points)[mask])
+            Obj_tmp.pcd.paint_uniform_color(np.asarray(colors[f % len(colors)]).astype("float") / 255.0)
+            seg_parts_array.append(Obj_tmp)
 
-    print("Creating colored version..")
-    colored_regions = copy(obj.pcd)
-    regions_col = np.zeros((len(obj.pcd.points), 3))
-    for k, face in enumerate(expanded_faces):
-        for point in face:
-            regions_col[point] = colors[k % len(colors)]
-    colored_regions.colors = o3d.utility.Vector3dVector(np.asarray(regions_col).astype("float") / 255.0)
-    #o3d.visualization.draw_geometries([colored_regions])
-    #pdb.set_trace()
+        print("Creating colored version..")
+        colored_regions = copy(obj.pcd)
+        regions_col = np.zeros((len(obj.pcd.points), 3))
+        for k, face in enumerate(expanded_faces):
+            for point in face:
+                regions_col[point] = colors[k % len(colors)]
+        colored_regions.colors = o3d.utility.Vector3dVector(np.asarray(regions_col).astype("float") / 255.0)
+        #o3d.visualization.draw_geometries([colored_regions])
+        #pdb.set_trace()
+    else:
+        
+        seg_parts_array, seg_regions_indices, colored_regions
+
     return seg_parts_array, seg_regions_indices, colored_regions
 
 def write_segmented_regions(seg_parts_array, colored_regions, output_dir, obj_name):

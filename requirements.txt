@@ -4,3 +4,5 @@ open3d
 matplotlib
 tqdm
 scikit-learn
+networkx
+disjoint_set

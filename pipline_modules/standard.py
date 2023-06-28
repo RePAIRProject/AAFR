@@ -355,7 +355,7 @@ def write_breaking_curves(obj, borders_indices, output_dir, obj_name):
     o3d.io.write_point_cloud(os.path.join(output_dir, f'inner_{obj_name}.ply'), inner_ppd)
 
 def segment_regions(obj, borders_indices, isolated_islands_pruned_graph, mode="ALI"):   
-    if mode=="ALI":
+    if mode == "ALI":
         seg_regions_indices = get_sides(isolated_islands_pruned_graph, borders_indices)
         node_face = {}
         face_nodes = []
@@ -388,11 +388,13 @@ def segment_regions(obj, borders_indices, isolated_islands_pruned_graph, mode="A
         colored_regions.colors = o3d.utility.Vector3dVector(np.asarray(regions_col).astype("float") / 255.0)
         #o3d.visualization.draw_geometries([colored_regions])
         #pdb.set_trace()
+        return seg_parts_array, seg_regions_indices, colored_regions
     else:
+        #  running segmentation with hdbscan
+        #seg_parts_array, seg_regions_indices, colored_regions
         
-        seg_parts_array, seg_regions_indices, colored_regions
+        print("todo")
 
-    return seg_parts_array, seg_regions_indices, colored_regions
 
 def write_segmented_regions(seg_parts_array, colored_regions, output_dir, obj_name):
     o3d.io.write_point_cloud(os.path.join(output_dir, f'col_regions_{obj_name}.ply'), colored_regions)

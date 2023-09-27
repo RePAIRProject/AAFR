@@ -9,8 +9,8 @@ import os
 def read_obj(path, voxel_size):
 
     if path.endswith('.ply'):
-        pcd1 = o3d.io.read_point_cloud(path)
-        voxel_percentage = down_sample_to(pcd1,voxel_size)
+        pcd = o3d.io.read_point_cloud(path)
+        voxel_percentage = down_sample_to(pcd,voxel_size)
         #print("my number is -> ",voxel_percentage)
         downpcd1 = pcd.voxel_down_sample(voxel_size=voxel_percentage)
     elif path.endswith('.obj'):

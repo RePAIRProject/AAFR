@@ -126,6 +126,8 @@ To cite the paper:
 
 This work is part of a project that has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No.964854. 
 
+Shootout to [@LucHayward](https://github.com/LucHayward) for the speedup (turns out, changing a list to a set when iterating over it for long time yielded a ~100x speed up! :fire:
+
 ## 7) License
 
 The code is released under the Creative Commons Zero v1.0 Universal License.

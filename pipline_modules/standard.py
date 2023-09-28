@@ -50,6 +50,7 @@ def get_sides(Graph, borders):
     faces = []
     all_visited = set()
     nodes = list(Graph.nodes)
+    borders = set(borders)
     shortest_cycle_length = np.sqrt(len(borders))//5
     with tqdm(total=len(nodes)) as pbar:
         while len(nodes):

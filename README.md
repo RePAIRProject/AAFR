@@ -111,7 +111,7 @@ If you encounter an issue due to modules compiled with different versions of num
 
 # 5) Relevant publications
 
-The code is related to the [paper accepted in the 2023 3DVR CVPR Workshop](https://arxiv.org/abs/2306.02782).
+The code is related to the [paper accepted in the 2023 3DVR CVPR Workshop](https://arxiv.org/abs/2306.02782) and published as conference proceedings at the 27th IEEE International Conference on Pattern Recognition, Kolkata, India, 2024.
 
 To cite the paper:
 ```

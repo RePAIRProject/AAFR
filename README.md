@@ -98,6 +98,9 @@ The results will be in the output folder (check the name, line 19 of `configs/as
 **Why before a `.yaml` file and now a `.py` file as config (with different syntax)?**
 They were created at different times, and the `.py` file is very useful to create nested folders. They are relatively easy to use so it should be possible to understand both, sorry for the change`.
 
+**How do the parameters in the `.py` file relate to the parameters of the paper?**
+Good question, as pointed out in [Issue #8](https://github.com/RePAIRProject/AAFR/issues/8), we expand on the details of the configurations in the [`config.md`](https://github.com/RePAIRProject/AAFR/blob/master/configs/config.md) file.
+
 ## Demo Run
 
 There is a *demo* run prepared. Check the [demo file](demo.md) for more info.

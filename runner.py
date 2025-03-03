@@ -415,9 +415,9 @@ class fragment_reassembler(object):
         print('done')
 
     def segment_regions(self):
-        print("The segmentation process was very slow, but now is super fast!")
-        print("Shootout to @LucHayward for the speedup (changing list to a set got us 100x speed up)")
-        #print("The code is in the processing module in the get_sides method: feel free to help improving it (:")
+        # print("The segmentation process was very slow, but now is super fast!")
+        # print("Thanks to @LucHayward for the speedup (changing list to a set got us 100x speed up)")
+        # print("The code is in the processing module in the get_sides method: feel free to help improving it (:")
         print('Segmenting object 1.. ')
         self.obj1_seg_parts_array, seg_regions_indices, self.obj1_colored_regions = self.processing_pipeline.segment_regions(self.obj1, self.obj1_borders_indices, self.obj1_isolated_islands_pruned_graph)
         print('Segmenting object 2.. ')

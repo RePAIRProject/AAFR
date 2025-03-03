@@ -95,15 +95,18 @@ This will assemble all the broken objects and create a lot (maybe too much? The 
 
 The results will be in the output folder (check the name, line 19 of `configs/assembly_cfg.py` file) and will contain segmented data (colored) registered data and a copy of the pointcloud (and also colored borders) so you should be able to easily visualize all intermediate steps (if you have no idea, use Meshlab to visualize `.ply` files)
 
-**Why before a `.yaml` file and now a `.py` file as config (with different syntax)?**
-They were created at different times, and the `.py` file is very useful to create nested folders. They are relatively easy to use so it should be possible to understand both, sorry for the change`.
-
-**How do the parameters in the `.py` file relate to the parameters of the paper?**
-Good question, as pointed out in [Issue #8](https://github.com/RePAIRProject/AAFR/issues/8), we expand on the details of the configurations in the [`config.md`](https://github.com/RePAIRProject/AAFR/blob/master/configs/config.md) file.
-
 ## Demo Run
 
 There is a *demo* run prepared. Check the [demo file](demo.md) for more info.
+
+## Configurations and Parameters
+
+#### **Why before a `.yaml` file and now a `.py` file as config (with different syntax)?**
+They were created at different times, and the `.py` file is very useful to create nested folders. They are relatively easy to use so it should be possible to understand both, sorry for the change`.
+
+#### **How do the parameters in the `.py` file relate to the parameters of the paper?**
+Good question, as pointed out in [Issue #8](https://github.com/RePAIRProject/AAFR/issues/8), we expand on the details of the configurations in the [`configs/configs.md`](https://github.com/RePAIRProject/AAFR/blob/master/configs/configs.md) file.
+
 
 # 4) Known Issues
 

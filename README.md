@@ -109,9 +109,12 @@ There is a *demo* run prepared. Check the [demo file](demo.md) for more info.
 
 The repo contains *a lot* of experiments, which will be organized with time. Use the scripts mentioned above for a guaranteed execution and use the rest of the code at your own risk.
 
+##### ImportError: numpy.core.multiarray failed to import
+If you encounter an issue due to modules compiled with different versions of numpy, most likely you are using numpy 2.0 and the code was done using a previous version. Thanks to [@ronaldpan](https://github.com/ronaldpan) who opened and solved [the issue #6](https://github.com/RePAIRProject/AAFR/issues/6) we know a quick workaround is to downgrade to `numpy==1.26.4`.
+
 # 5) Relevant publications
 
-The code is related to the [paper accepted in the 2023 3DVR CVPR Workshop](https://arxiv.org/abs/2306.02782).
+The code is related to the [paper accepted in the 2023 3DVR CVPR Workshop](https://arxiv.org/abs/2306.02782) and published as conference proceedings at the 27th IEEE International Conference on Pattern Recognition, Kolkata, India, 2024.
 
 To cite the paper:
 ```
